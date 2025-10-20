@@ -17,11 +17,6 @@ import (
 	"github.com/tea4go/jvms/utils/jdk"
 )
 
-// getSimilarAvailableVersions 根据版本获取相似的可用版本，用于支持版本未找到错误提示
-// func getSimilarAvailableVersions(version string) {
-
-// }
-
 // getJavaHome 从临时JDK文件目录中获取JAVA_HOME路径
 // 参数:
 //
