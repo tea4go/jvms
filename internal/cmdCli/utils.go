@@ -245,85 +245,80 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		WebJDK.BaseURL = "https://mirrors.tuna.tsinghua.edu.cn/Adoptium/"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-
 	case "lzu":
 		logs.Debug("\n📦 使用镜像源: 兰州大学 (Lanzhou University)")
 		WebJDK := jdk.TWebLzu{}
 		WebJDK.BaseURL = "https://mirror4.lzu.edu.cn/openjdk/"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-
 	case "huawei":
 		logs.Debug("\n📦 使用镜像源: 华为云 (Huawei Cloud)")
 		WebJDK := jdk.TWebHuawei{}
 		WebJDK.BaseURL = "https://mirrors.huaweicloud.com/openjdk/"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-
 	case "injdk":
 		logs.Debug("\n📦 使用镜像源: InJDK 网站")
 		WebJDK := jdk.TWebInjdk{}
 		WebJDK.BaseURL = "https://d10.injdk.cn/openjdk/openjdk/"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-
 	case "azul":
 		logs.Debug("\n📦 使用镜像源: Azul Zulu")
 		WebJDK := jdk.TWebAzul{}
 		WebJDK.BaseURL = "https://api.azul.com/metadata/v1/zulu/packages"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-
 	case "adoptium":
 		logs.Debug("\n📦 使用镜像源: Eclipse Adoptium")
 		WebJDK := jdk.TWebAdoptium{}
 		WebJDK.BaseURL = "https://api.adoptium.net/v3"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-
 	default:
-		fmt.Println("❌ 错误: 未知的镜像源类型 '%s'\n", cfx.WebType)
-		fmt.Println("\n可用的镜像源:")
-		fmt.Println("  lzu      - 兰州大学开源软件镜像站")
-		fmt.Println("  tuna     - 清华大学开源软件镜像站")
-		fmt.Println("  injdk    - InJDK 网站")
-		fmt.Println("  huawei   - 华为云镜像站")
-		fmt.Println("  azul     - Azul Zulu OpenJDK")
-		fmt.Println("  adoptium - Eclipse Adoptium")
-		os.Exit(1)
+		err = fmt.Errorf("❌ 错误: 未知的镜像源类型(%s)", cfx.WebType)
 	}
 	// 检查爬取是否出错
 	if err != nil {
 		return nil, err
 	}
 
-	// 使用 map 来去重，只保留每个主版本号的最新完整版本
-	majorVersionMap := make(map[string]entity.TJDKVersion)
+	if cfx.WebAll {
+		for _, oneJdk := range downOpenJDKs {
+			v := entity.TJDKVersion{}
+			v.Version = fmt.Sprintf("openjdk-%s", oneJdk.Version)
+			v.Url = oneJdk.URL
+			versions = append(versions, v)
+		}
+	} else {
+		// 使用 map 来去重，只保留每个主版本号的最新完整版本
+		majorVersionMap := make(map[string]entity.TJDKVersion)
 
-	for _, huaweiJdk := range downOpenJDKs {
-		versionName := fmt.Sprintf("openjdk-%s", huaweiJdk.Version)
-		majorVersion := extractMajorVersion(versionName)
+		for _, oneJdk := range downOpenJDKs {
+			versionName := fmt.Sprintf("openjdk-%s", oneJdk.Version)
+			majorVersion := extractMajorVersion(versionName)
 
-		// 如果该主版本号还没有记录，或者当前版本更新，则保存完整版本号
-		if existing, exists := majorVersionMap[majorVersion]; !exists {
-			majorVersionMap[majorVersion] = entity.TJDKVersion{
-				Version: versionName, // 保留完整版本号，例如 "openjdk-12.0.2"
-				Url:     huaweiJdk.URL,
-			}
-		} else {
-			// 比较版本，保留更新的版本（完整版本号）
-			if compareVersions(versionName, existing.Version) > 0 {
+			// 如果该主版本号还没有记录，或者当前版本更新，则保存完整版本号
+			if existing, exists := majorVersionMap[majorVersion]; !exists {
 				majorVersionMap[majorVersion] = entity.TJDKVersion{
-					Version: versionName, // 保留完整版本号
-					Url:     huaweiJdk.URL,
+					Version: versionName, // 保留完整版本号，例如 "openjdk-12.0.2"
+					Url:     oneJdk.URL,
+				}
+			} else {
+				// 比较版本，保留更新的版本（完整版本号）
+				if compareVersions(versionName, existing.Version) > 0 {
+					majorVersionMap[majorVersion] = entity.TJDKVersion{
+						Version: versionName, // 保留完整版本号
+						Url:     oneJdk.URL,
+					}
 				}
 			}
 		}
-	}
 
-	// 将 map 转换为切片
-	for _, v := range majorVersionMap {
-		versions = append(versions, v)
+		// 将 map 转换为切片
+		for _, v := range majorVersionMap {
+			versions = append(versions, v)
+		}
 	}
 
 	// 对版本进行排序（从大到小）

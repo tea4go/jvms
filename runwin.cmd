@@ -35,8 +35,10 @@ SET GO111MODULE=on
 SET CGO_ENABLED=0
 SET GOOS=windows
 SET GOARCH=amd64
-taskkill /f /im %app_name%.exe >nul 2>nul
-del %app_name%.exe >nul 2>nul
+taskkill /f /im %app_name%.exe  >nul 2>nul
+del %app_name%.exe               >nul 2>nul
+del %app_name%*.gz               >nul 2>nul
+del %app_name%*.zip              >nul 2>nul
 attrib -H *.old                  >nul 2>nul
 del *.exe.old                    >nul 2>nul
 
@@ -65,4 +67,6 @@ echo 当前版本：%app_version%
 echo 2 - 运行程序
 echo =============================================================
 del jdkdlindex.json
-%app_name% rls -t lzu
+echo %app_name% -v
+%app_name% -v
+rem %app_name% rls -t lzu -a

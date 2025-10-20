@@ -32,6 +32,7 @@ func rlsCmd(args []string, cfx *entity.TConfig) error {
 		web.SetProxy(cfx.Proxy)
 	}
 
+	cfx.WebAll = *showAll
 	cfx.WebType = *webType
 
 	versions, err := getJdkVersions(cfx)

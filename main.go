@@ -5,9 +5,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	logs "github.com/tea4go/gh/log4go"
 
@@ -19,15 +22,20 @@ import (
 )
 
 // version 定义当前 JVMS 的版本号
+var AppName string = "jvms"
 var AppVersion = "3.0.7"
 var BuildTime = ""
+var IsBeta string = "false"
 
 // cfx 全局配置对象，存储 JVMS 的运行配置
 var cfx entity.TConfig
 
 // main 是程序的入口函数
-// 初始化 CLI 应用并执行用户命令
 func main() {
+	flag.Usage = func() {
+		printUsage()
+	}
+
 	// 初始化配置
 	if err := startup(); err != nil {
 		logs.Emergency(err.Error())
@@ -69,6 +77,14 @@ func main() {
 	if err := cmdCli.Execute(command, cmdArgs, cmdParams); err != nil {
 		logs.Emergency(err.Error())
 	}
+}
+
+func filepathJoin(elem ...string) string {
+	path := filepath.Join(elem...)
+	if runtime.GOOS == "windows" {
+		return strings.ReplaceAll(path, "\\", "/")
+	}
+	return path
 }
 
 // printUsage 打印使用说明
