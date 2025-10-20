@@ -1,13 +1,14 @@
-name: Go
+name: Build JVMS
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
 
   build:
-    name: Build
+    name: Build All Platforms
     runs-on: ubuntu-latest
     steps:
 
@@ -20,25 +21,113 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Build
+      - name: Set up build environment
         run: |
-          hash=`git rev-list --tags --max-count=1`
-          version=`git describe --tags $hash`
-          flag="-s -w -X main.version=$version"
-          go mod tidy
-          GOOS=windows GOARCH=amd64   go build -ldflags "$flag" -o build/windows-amd64/jvms.exe
-          GOOS=windows GOARCH=386     go build -ldflags "$flag" -o build/windows-386/jvms.exe
+          # 获取版本信息
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          else
+            VERSION="3.0.7"
+          fi
+          
+          # 获取构建时间
+          BUILD_TIME=$(date '+%Y-%m-%d(%H:%M:%S)')
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "BUILD_TIME=$BUILD_TIME" >> $GITHUB_ENV
+          echo "APP_NAME=jvms" >> $GITHUB_ENV
+          
+          # 创建构建目录
+          mkdir -p build/{windows-amd64,windows-386,linux-amd64,linux-arm64,darwin-amd64,darwin-arm64}
 
-      - name: compression zip
+      - name: Clean previous builds
         run: |
-          hash=`git rev-list --tags --max-count=1`
-          version=`git describe --tags $hash`
-          zip -j jvms_${version}_amd64.zip build/windows-amd64/jvms.exe
-          zip -j jvms_${version}_386.zip   build/windows-386/jvms.exe
+          rm -f ${APP_NAME}*.zip ${APP_NAME}*.tar.gz
+          rm -f build/*/${APP_NAME}*
+
+      - name: Build Windows (amd64)
+        run: |
+          echo "Building Windows amd64..."
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
+            -ldflags "-s -w -X main.AppVersion=$VERSION -X main.BuildTime=$BUILD_TIME" \
+            -o build/windows-amd64/${APP_NAME}.exe .
+
+      - name: Build Windows (386)
+        run: |
+          echo "Building Windows 386..."
+          GOOS=windows GOARCH=386 CGO_ENABLED=0 go build \
+            -ldflags "-s -w -X main.AppVersion=$VERSION -X main.BuildTime=$BUILD_TIME" \
+            -o build/windows-386/${APP_NAME}.exe .
+
+      - name: Build Linux (amd64)
+        run: |
+          echo "Building Linux amd64..."
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
+            -ldflags "-s -w -X main.AppVersion=$VERSION -X main.BuildTime=$BUILD_TIME" \
+            -o build/linux-amd64/${APP_NAME} .
+
+      - name: Build Linux (arm64)
+        run: |
+          echo "Building Linux arm64..."
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build \
+            -ldflags "-s -w -X main.AppVersion=$VERSION -X main.BuildTime=$BUILD_TIME" \
+            -o build/linux-arm64/${APP_NAME} .
+
+      - name: Build macOS (amd64)
+        run: |
+          echo "Building macOS amd64..."
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build \
+            -ldflags "-s -w -X main.AppVersion=$VERSION -X main.BuildTime=$BUILD_TIME" \
+            -o build/darwin-amd64/${APP_NAME} .
+
+      - name: Build macOS (arm64)
+        run: |
+          echo "Building macOS arm64..."
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build \
+            -ldflags "-s -w -X main.AppVersion=$VERSION -X main.BuildTime=$BUILD_TIME" \
+            -o build/darwin-arm64/${APP_NAME} .
+
+      - name: Test version output
+        run: |
+          echo "Testing version output..."
+          ./build/linux-amd64/${APP_NAME} -v
+          echo "Current version: $(./build/linux-amd64/${APP_NAME} -v)"
+
+      - name: Create Windows packages
+        run: |
+          echo "Creating Windows packages..."
+          cd build/windows-amd64
+          zip -j ../../${APP_NAME}_${VERSION}_windows-amd64.zip ${APP_NAME}.exe
+          cd ../windows-386
+          zip -j ../../${APP_NAME}_${VERSION}_windows-386.zip ${APP_NAME}.exe
+          cd ../..
+
+      - name: Create Linux packages
+        run: |
+          echo "Creating Linux packages..."
+          cd build/linux-amd64
+          tar -czf ../../${APP_NAME}_${VERSION}_linux-amd64.tar.gz ${APP_NAME}
+          cd ../linux-arm64
+          tar -czf ../../${APP_NAME}_${VERSION}_linux-arm64.tar.gz ${APP_NAME}
+          cd ../..
+
+      - name: Create macOS packages
+        run: |
+          echo "Creating macOS packages..."
+          cd build/darwin-amd64
+          tar -czf ../../${APP_NAME}_${VERSION}_darwin-amd64.tar.gz ${APP_NAME}
+          cd ../darwin-arm64
+          tar -czf ../../${APP_NAME}_${VERSION}_darwin-arm64.tar.gz ${APP_NAME}
+          cd ../..
+
+      - name: List created packages
+        run: |
+          echo "Created packages:"
+          ls -la ${APP_NAME}_${VERSION}_*
 
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["./jvms_*.zip"]'
+          asset_paths: '["./jvms_*.zip", "./jvms_*.tar.gz"]'
