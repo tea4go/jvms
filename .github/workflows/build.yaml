@@ -29,7 +29,10 @@ jobs:
           else
             VERSION="3.0.7"
           fi
-          
+
+          # VERSION 如果v开头去掉v
+          VERSION=$(echo $VERSION | sed 's/^v//')
+
           # 获取构建时间
           BUILD_TIME=$(date '+%Y-%m-%d(%H:%M:%S)')
           
@@ -97,37 +100,37 @@ jobs:
         run: |
           echo "Creating Windows packages..."
           cd build/windows-amd64
-          zip -j ../../${APP_NAME}_${VERSION}_windows-amd64.zip ${APP_NAME}.exe
+          zip -j ../../${APP_NAME}${VERSION}_windows-amd64.zip ${APP_NAME}.exe
           cd ../windows-386
-          zip -j ../../${APP_NAME}_${VERSION}_windows-386.zip ${APP_NAME}.exe
+          zip -j ../../${APP_NAME}${VERSION}_windows-386.zip ${APP_NAME}.exe
           cd ../..
 
       - name: Create Linux packages
         run: |
           echo "Creating Linux packages..."
           cd build/linux-amd64
-          tar -czf ../../${APP_NAME}_${VERSION}_linux-amd64.tar.gz ${APP_NAME}
+          tar -czf ../../${APP_NAME}${VERSION}_linux-amd64.tar.gz ${APP_NAME}
           cd ../linux-arm64
-          tar -czf ../../${APP_NAME}_${VERSION}_linux-arm64.tar.gz ${APP_NAME}
+          tar -czf ../../${APP_NAME}${VERSION}_linux-arm64.tar.gz ${APP_NAME}
           cd ../..
 
       - name: Create macOS packages
         run: |
           echo "Creating macOS packages..."
           cd build/darwin-amd64
-          tar -czf ../../${APP_NAME}_${VERSION}_darwin-amd64.tar.gz ${APP_NAME}
+          tar -czf ../../${APP_NAME}${VERSION}_darwin-amd64.tar.gz ${APP_NAME}
           cd ../darwin-arm64
-          tar -czf ../../${APP_NAME}_${VERSION}_darwin-arm64.tar.gz ${APP_NAME}
+          tar -czf ../../${APP_NAME}${VERSION}_darwin-arm64.tar.gz ${APP_NAME}
           cd ../..
 
       - name: List created packages
         run: |
           echo "Created packages:"
-          ls -la ${APP_NAME}_${VERSION}_*
+          ls -la ${APP_NAME}${VERSION}_*
 
       - name: Upload release binaries
-        uses: alexellis/upload-assets@0.2.2
+        uses: alexellis/upload-assets@0.4.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["./jvms_*.zip", "./jvms_*.tar.gz"]'
+          asset_paths: '["./jvms*.zip", "./jvms*.tar.gz"]'
