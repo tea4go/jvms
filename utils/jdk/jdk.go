@@ -3,6 +3,8 @@ package jdk
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/tea4go/jvms/utils/file"
@@ -58,6 +60,14 @@ func GetInstalled(root string) []string {
 //
 //	bool - 已安装返回 true，否则返回 false
 func IsVersionInstalled(root string, version string) bool {
-	isInstalled := file.Exists(fmt.Sprintf("%s/%s/bin/javac.exe", root, version))
-	return isInstalled
+	javacPath := filepath.Join(root, version, "bin", GetJavacName())
+	return file.Exists(javacPath)
+}
+
+// GetJavacName 根据操作系统返回 javac 的文件名
+func GetJavacName() string {
+	if runtime.GOOS == "windows" {
+		return "javac.exe"
+	}
+	return "javac"
 }

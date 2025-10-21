@@ -53,6 +53,7 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	for _, version := range versions {
 		if version.Version == v {
+			fmt.Printf("正在下载 JDK: %s\n", version.Url)
 			dlzipfile, success := web.GetJDK(cfx.Download, v, version.Url)
 			if success {
 				fmt.Printf("正在安装 JDK %s ...\n", v)
@@ -65,24 +66,31 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 						panic(err)
 					}
 				}
-				err := file.Unzip(dlzipfile, jdktempfile)
+				err := file.Extract(dlzipfile, jdktempfile)
 				if err != nil {
 					return fmt.Errorf("解压失败: %w", err)
 				}
 
 				// 复制 JDK 文件到安装目录
 				temJavaHome := getJavaHome(jdktempfile)
+				if temJavaHome == "" {
+					return fmt.Errorf("未找到有效的 JDK 目录，请检查%s", jdktempfile)
+				}
 				err = os.Rename(temJavaHome, filepath.Join(cfx.Store, v))
 				if err != nil {
-					return fmt.Errorf("解压失败: %w", err)
+					return fmt.Errorf("移动文件失败: %w", err)
 				}
 
 				// 删除临时目录
 				// 可以考虑保留临时文件
-				os.RemoveAll(jdktempfile)
+				err = os.RemoveAll(jdktempfile)
+				if err != nil {
+					fmt.Printf("警告: 清理临时目录失败: %v\n", err)
+				}
+
 				fmt.Printf("安装成功完成。如果您想使用此版本，请使用: jvms switch %v", v)
 			} else {
-				fmt.Println("无法下载 JDK " + v + " 可执行文件。")
+				return fmt.Errorf("无法下载 JDK %s 可执行文件", v)
 			}
 			return nil
 		}
