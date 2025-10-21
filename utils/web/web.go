@@ -8,13 +8,14 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 var client = &http.Client{
-	Timeout: 60 * time.Second,
+	Timeout: 180 * time.Second, // 从60s延长到180s，避免下载超时
 	Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
@@ -115,20 +116,42 @@ func Download(url string, target string) bool {
 //	string - 下载的文件路径，失败则返回空字符串
 //	bool - 下载成功返回 true，失败返回 false
 func GetJDK(download string, v string, url string) (string, bool) {
-	fileName := filepath.Join(download, fmt.Sprintf("%s.zip", v))
-	os.Remove(fileName)
 	if url == "" {
-		// 没有 URL 意味着该版本/架构不可用
-		fmt.Printf("JDK %s 当前不可用。", v)
-	} else {
-		fmt.Printf("正在下载 JDK 版本 %s...\n", v)
-		if Download(url, fileName) {
-			fmt.Println("完成")
-			return fileName, true
-		} else {
-			return "", false
-		}
+		fmt.Printf("JDK %s 当前不可用。\n", v)
+		return "", false
+	}
+
+	// 从 URL 中提取完整的文件名
+	urlParts := strings.Split(url, "/")
+	originalFileName := urlParts[len(urlParts)-1]
+
+	// 提取扩展名（处理 .tar.gz 等多重扩展名）
+	ext := extractExtension(originalFileName)
+
+	fileName := filepath.Join(download, fmt.Sprintf("%s%s", v, ext))
+	os.Remove(fileName)
+
+	if Download(url, fileName) {
+		fmt.Println("完成")
+		return fileName, true
 	}
 	return "", false
 
+}
+
+// 提取文件扩展名（如 .tar.gz  .zip）
+func extractExtension(filename string) string {
+	// 处理双扩展名
+	if strings.HasSuffix(filename, ".tar.gz") {
+		return ".tar.gz"
+	}
+	if strings.HasSuffix(filename, ".tar.xz") {
+		return ".tar.xz"
+	}
+	if strings.HasSuffix(filename, ".tar.bz2") {
+		return ".tar.bz2"
+	}
+
+	// 单扩展名
+	return filepath.Ext(filename)
 }

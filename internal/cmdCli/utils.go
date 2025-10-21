@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,14 +28,39 @@ import (
 //	string - JAVA_HOME路径(包含javac.exe的父目录)
 func getJavaHome(jdkTempFile string) string {
 	var javaHome string
+
+	// 确定要查找的文件名
+	javacName := jdk.GetJavacName()
+
 	fs.WalkDir(os.DirFS(jdkTempFile), ".", func(path string, d fs.DirEntry, err error) error {
-		if filepath.Base(path) == "javac.exe" {
-			temPath := strings.Replace(path, "bin/javac.exe", "", -1)
-			javaHome = filepath.Join(jdkTempFile, temPath)
-			return fs.SkipDir
+		if err != nil {
+			return err
 		}
+
+		// 跳过非文件
+		if d.IsDir() {
+			return nil
+		}
+
+		// 查找 javac 文件
+		if filepath.Base(path) == javacName {
+			fmt.Printf("找到 javac: %s\n", path)
+
+			// 获取 bin 目录的父目录（即 JAVA_HOME）
+			absPath := filepath.Join(jdkTempFile, path)
+
+			// 向上查找，直到找到包含 bin 目录的父目录
+			binDir := filepath.Dir(absPath)
+			if filepath.Base(binDir) == "bin" {
+				javaHome = filepath.Dir(binDir)
+				fmt.Printf("确定 JAVA_HOME: %s\n", javaHome)
+				return fs.SkipAll
+			}
+		}
+
 		return nil
 	})
+
 	return javaHome
 }
 
@@ -219,7 +245,8 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	if isCacheValid(cacheFile) {
 		// 尝试从缓存加载
 		versions, err := loadCachedVersions(cacheFile)
-		if err == nil {
+		if err == nil && len(versions) > 0 {
+			// 本地缓存文件存在，且有数据，则用缓存数据
 			fmt.Println("从本地缓存加载版本列表...")
 			return versions, nil
 		}
@@ -246,12 +273,6 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		WebJDK.BaseURL = "https://mirror4.lzu.edu.cn/openjdk/"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-	case "huawei":
-		logs.Debug("\n📦 使用镜像源: 华为云 (Huawei Cloud)")
-		WebJDK := jdk.TWebHuawei{}
-		WebJDK.BaseURL = "https://mirrors.huaweicloud.com/openjdk/"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
-		downOpenJDKs, err = WebJDK.ParseURL()
 	case "injdk":
 		logs.Debug("\n📦 使用镜像源: InJDK 网站")
 		WebJDK := jdk.TWebInjdk{}
@@ -270,16 +291,34 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		WebJDK.BaseURL = "https://api.adoptium.net/v3"
 		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
+	case "huawei":
 	default:
-		err = fmt.Errorf("❌ 错误: 未知的镜像源类型(%s)", cfx.WebType)
+		// 默认使用huawei镜像源
+		logs.Debug("\n📦 使用镜像源: 华为云 (Huawei Cloud)")
+		WebJDK := jdk.TWebHuawei{}
+		WebJDK.BaseURL = "https://mirrors.huaweicloud.com/openjdk/"
+		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		downOpenJDKs, err = WebJDK.ParseURL()
 	}
 	// 检查爬取是否出错
 	if err != nil {
+		logs.Error("❌ 错误: 获取JDK版本镜像源失败，请检查网络连接或镜像源地址是否正确\n%v", err)
 		return nil, err
 	}
 
+	// 获取当前系统和架构信息
+	currentOS := runtime.GOOS     // linux, darwin, windows
+	currentArch := runtime.GOARCH // amd64, arm64
+
+	// 过滤符合当前系统和架构的JDK
+	filteredJDKs := filterJDKsByPlatform(downOpenJDKs, currentOS, currentArch)
+
+	if len(filteredJDKs) == 0 {
+		return nil, fmt.Errorf("❌ 错误: 未找到适合当前系统(%s-%s)的JDK版本", currentOS, currentArch)
+	}
+
 	if cfx.WebAll {
-		for _, oneJdk := range downOpenJDKs {
+		for _, oneJdk := range filteredJDKs {
 			v := entity.TJDKVersion{}
 			v.Version = fmt.Sprintf("openjdk-%s", oneJdk.Version)
 			v.Url = oneJdk.URL
@@ -289,7 +328,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		// 使用 map 来去重，只保留每个主版本号的最新完整版本
 		majorVersionMap := make(map[string]entity.TJDKVersion)
 
-		for _, oneJdk := range downOpenJDKs {
+		for _, oneJdk := range filteredJDKs {
 			versionName := fmt.Sprintf("openjdk-%s", oneJdk.Version)
 			majorVersion := extractMajorVersion(versionName)
 
@@ -330,4 +369,51 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	}
 
 	return versions, nil
+}
+
+// 根据系统和架构过滤JDK列表
+func filterJDKsByPlatform(jdks []jdk.TOpenJDK, osType, arch string) []jdk.TOpenJDK {
+	var filtered []jdk.TOpenJDK
+
+	// 构建平台标识符
+	platformSuffix := getPlatformSuffix(osType, arch)
+
+	for _, oneJdk := range jdks {
+		// 检查URL是否包含对应的平台标识
+		if strings.Contains(oneJdk.URL, platformSuffix) {
+			filtered = append(filtered, oneJdk)
+		}
+	}
+
+	return filtered
+}
+
+// 获取平台后缀标识
+func getPlatformSuffix(osType, arch string) string {
+	var osSuffix, archSuffix string
+
+	// 转换操作系统名称
+	switch osType {
+	case "linux":
+		osSuffix = "linux"
+	case "darwin":
+		osSuffix = "macos"
+	case "windows":
+		osSuffix = "windows"
+	default:
+		osSuffix = osType
+	}
+
+	// 转换架构名称
+	switch arch {
+	case "amd64":
+		archSuffix = "x64"
+	case "arm64":
+		archSuffix = "aarch64"
+	default:
+		archSuffix = arch
+	}
+
+	// 返回格式: linux-x64, macos-aarch64, windows-x64 等
+	return fmt.Sprintf("%s-%s", osSuffix, archSuffix)
 }
