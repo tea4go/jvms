@@ -3,7 +3,7 @@ package cmdCli
 import (
 	"fmt"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 
 	"github.com/tea4go/jvms/internal/entity"
 )

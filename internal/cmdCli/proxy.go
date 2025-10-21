@@ -3,8 +3,8 @@ package cmdCli
 import (
 	"fmt"
 
-	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
+	"github.com/urfave/cli"
 )
 
 // proxyCmd 执行代理设置命令

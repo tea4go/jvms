@@ -309,7 +309,7 @@ A: 删除 JVMS 安装目录，并手动清理系统 PATH 中的 JAVA_HOME 相关
 
 ### Q: JVMS 支持哪些 Windows 版本？
 A: 支持 Windows 7 及以上版本（需要管理员权限创建符号链接）。
-dddd
+
 ### Q: 为什么需要管理员权限？
 A: Windows 创建符号链接需要管理员权限。只在 `jvms init` 和 `jvms switch` 时需要。
 

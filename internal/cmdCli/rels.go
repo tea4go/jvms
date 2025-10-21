@@ -3,9 +3,9 @@ package cmdCli
 import (
 	"fmt"
 
-	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/web"
+	"github.com/urfave/cli"
 )
 
 // rlsCmd 执行显示可下载版本列表的命令

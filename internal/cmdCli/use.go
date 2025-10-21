@@ -1,8 +1,8 @@
 package cmdCli
 
 import (
-	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
+	"github.com/urfave/cli"
 )
 
 // useCmd 执行使用JDK版本的命令
