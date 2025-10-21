@@ -117,7 +117,7 @@ func Download(url string, target string) bool {
 //	bool - 下载成功返回 true，失败返回 false
 func GetJDK(download string, v string, url string) (string, bool) {
 	if url == "" {
-		fmt.Printf("JDK %s 当前不可用。\n", v)
+		fmt.Printf("JDK版本 %s 的下载无效\n", v)
 		return "", false
 	}
 
@@ -132,7 +132,7 @@ func GetJDK(download string, v string, url string) (string, bool) {
 	os.Remove(fileName)
 
 	if Download(url, fileName) {
-		fmt.Println("完成")
+		fmt.Println("下载完成")
 		return fileName, true
 	}
 	return "", false

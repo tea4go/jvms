@@ -43,7 +43,7 @@ func switchCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 	logs.Debug("切换JDK版本 - %s", cfx.Store)
 	if ctx.NArg() == 0 {
-		return errors.New("您应该输入版本或索引号，输入 \"jvms list\" 查看已安装的版本")
+		return errors.New("您应该输入版本或索引号，输入 jvms list 查看已安装的版本")
 	}
 	if cfx.JavaHome == "" {
 		return errors.New("您先执行 init 命令，初始化 JAVA_HOME 目录")

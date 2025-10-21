@@ -37,7 +37,7 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	for i, version := range versions {
 		fmt.Printf("%3d) %s\n", i+1, version.Version)
 		if !showAll && i >= 9 {
-			fmt.Println("\n使用 \"jvm rls -a\" 显示所有版本")
+			fmt.Println("\n使用 jvm rls -a 显示所有版本")
 			break
 		}
 	}

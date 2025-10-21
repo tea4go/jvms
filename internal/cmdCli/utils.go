@@ -44,7 +44,7 @@ func getJavaHome(jdkTempFile string) string {
 
 		// 查找 javac 文件
 		if filepath.Base(path) == javacName {
-			fmt.Printf("找到 javac: %s\n", path)
+			fmt.Printf("找到 javac 所在目录 - %s\n", path)
 
 			// 获取 bin 目录的父目录（即 JAVA_HOME）
 			absPath := filepath.Join(jdkTempFile, path)
@@ -53,7 +53,7 @@ func getJavaHome(jdkTempFile string) string {
 			binDir := filepath.Dir(absPath)
 			if filepath.Base(binDir) == "bin" {
 				javaHome = filepath.Dir(binDir)
-				fmt.Printf("确定 JAVA_HOME: %s\n", javaHome)
+				fmt.Printf("确定 JAVA_HOME = %s\n", javaHome)
 				return fs.SkipAll
 			}
 		}

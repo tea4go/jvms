@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	logs "github.com/tea4go/gh/log4go"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
 	"github.com/tea4go/jvms/utils/jdk"
@@ -29,7 +30,7 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	}
 
 	if ctx.NArg() == 0 {
-		return errors.New("无效的版本，输入 \"jvms rls\" 查看可供安装的版本")
+		return errors.New("无效的版本，输入 git jvms rls 查看可供安装的版本")
 	}
 
 	v := ctx.Args().First()
@@ -53,13 +54,14 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	for _, version := range versions {
 		if version.Version == v {
-			fmt.Printf("正在下载 JDK: %s\n", version.Url)
+			fmt.Printf("正在下载 %s - %s\n", v, version.Url)
 			dlzipfile, success := web.GetJDK(cfx.Download, v, version.Url)
 			if success {
-				fmt.Printf("正在安装 JDK %s ...\n", v)
+				fmt.Printf("正在安装 %s ...\n", v)
 
 				// 解压 JDK 到临时目录
 				jdktempfile := filepath.Join(cfx.Download, fmt.Sprintf("%s_temp", v))
+				logs.Debug("解压 %s 到临时目录 - %s", v, jdktempfile)
 				if file.Exists(jdktempfile) {
 					err := os.RemoveAll(jdktempfile)
 					if err != nil {
@@ -68,17 +70,20 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 				}
 				err := file.Extract(dlzipfile, jdktempfile)
 				if err != nil {
-					return fmt.Errorf("解压失败: %w", err)
+					return fmt.Errorf("解压失败，%s", err.Error())
 				}
 
 				// 复制 JDK 文件到安装目录
 				temJavaHome := getJavaHome(jdktempfile)
 				if temJavaHome == "" {
-					return fmt.Errorf("未找到有效的 JDK 目录，请检查%s", jdktempfile)
+					return fmt.Errorf("当前下载的 %s 为无效版本，请手工检查 %s", v, jdktempfile)
 				}
-				err = os.Rename(temJavaHome, filepath.Join(cfx.Store, v))
+
+				destJavaHome := filepath.Join(cfx.Store, v)
+				logs.Debug("移动目录 %s -> %s", temJavaHome, destJavaHome)
+				err = os.Rename(temJavaHome, destJavaHome)
 				if err != nil {
-					return fmt.Errorf("移动文件失败: %w", err)
+					return fmt.Errorf("移动目录失败，%s", err.Error())
 				}
 
 				// 删除临时目录
@@ -88,13 +93,14 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 					fmt.Printf("警告: 清理临时目录失败，%v\n", err)
 				}
 
-				fmt.Printf("安装成功完成。如果您想使用此版本，请使用: jvms switch %v", v)
+				fmt.Println("安装成功完成。")
+				fmt.Printf("如果您想使用此版本，请执行 jvms switch %v", v)
 			} else {
-				return fmt.Errorf("无法下载 JDK %s 可执行文件", v)
+				return fmt.Errorf("无法下载 %s 版本", v)
 			}
 			return nil
 		}
 	}
 
-	return errors.New("无效的版本，输入 \"jvms rls\" 查看可供安装的版本")
+	return errors.New("无效的版本，输入 jvms rls 查看可供安装的版本")
 }

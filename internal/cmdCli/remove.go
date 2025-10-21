@@ -23,7 +23,7 @@ import (
 //	error - 执行错误
 func removeCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	if ctx.NArg() == 0 {
-		return errors.New("您应该输入一个版本，输入 \"jvms list\" 查看已安装的版本")
+		return errors.New("您应该输入一个版本，输入 jvms list 查看已安装的版本")
 	}
 
 	v := ctx.Args().First()
@@ -42,7 +42,7 @@ func removeCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 			fmt.Printf(" 完成")
 		}
 	} else {
-		fmt.Println("jdk " + v + " 未安装。输入 \"jvms list\" 查看已安装的版本。")
+		fmt.Println("jdk " + v + " 未安装。输入 jvms list 查看已安装的版本。")
 	}
 	return nil
 }
