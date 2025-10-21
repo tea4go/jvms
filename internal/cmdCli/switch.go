@@ -90,7 +90,7 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 		return fmt.Errorf("切换 jdk 失败(%s)，%s", cfx.JavaHome, err.Error())
 	}
 
-	fmt.Println("切换成功。\n当前使用 JDK " + v)
+	fmt.Println("切换成功。\n当前使用 " + v)
 	cfx.CurrentJDKVersion = v
 	return nil
 }
