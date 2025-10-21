@@ -3,6 +3,7 @@ package cmdCli
 import (
 	"fmt"
 
+	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/jdk"
 )
@@ -10,11 +11,14 @@ import (
 // listCmd 执行列出已安装JDK的命令
 // 显示所有已安装的JDK版本，并标记当前正在使用的版本
 // 参数:
-//   args - 命令参数
-//   cfx - 配置对象指针
+//
+//	args - 命令参数
+//	cfx - 配置对象指针
+//
 // 返回值:
-//   error - 执行错误
-func listCmd(args []string, cfx *entity.TConfig) error {
+//
+//	error - 执行错误
+func listCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	fmt.Println("已安装的 jdk (* 标记正在使用):")
 	v := jdk.GetInstalled(cfx.Store)
 	for i, version := range v {

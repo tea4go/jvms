@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/spf13/pflag"
+	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
 )
@@ -22,19 +22,15 @@ import (
 // 返回值:
 //
 //	error - 执行错误
-func initCmd(args []string, cfx *entity.TConfig) error {
-	// 创建命令专用的 FlagSet
-	fs := pflag.NewFlagSet("init", pflag.ContinueOnError)
-
-	javaHome := fs.String("java_home", filepath.Join(os.Getenv("ProgramFiles"), "jdk"), "JAVA_HOME 位置")
-
-	if err := fs.Parse(args); err != nil {
-		return err
+func initCmd(ctx *cli.Context, cfx *entity.TConfig) error {
+	javaHome := ctx.String("java_home")
+	if javaHome == "" {
+		javaHome = defaultJavaHome()
 	}
 
 	// 设置 JAVA_HOME
-	if fs.Changed("java_home") || cfx.JavaHome == "" {
-		cfx.JavaHome = *javaHome
+	if ctx.IsSet("java_home") || cfx.JavaHome == "" {
+		cfx.JavaHome = javaHome
 	}
 
 	cmd := exec.Command("cmd", "/C", "setx", "JAVA_HOME", cfx.JavaHome, "/M")
@@ -54,4 +50,8 @@ func initCmd(args []string, cfx *entity.TConfig) error {
 	fmt.Println("添加 jvms.exe 到 `path` 环境变量")
 
 	return nil
+}
+
+func defaultJavaHome() string {
+	return filepath.Join(os.Getenv("ProgramFiles"), "jdk")
 }

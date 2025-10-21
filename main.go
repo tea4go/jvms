@@ -5,12 +5,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"flag"
-	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 
 	logs "github.com/tea4go/gh/log4go"
 
@@ -32,10 +28,6 @@ var cfx entity.TConfig
 
 // main 是程序的入口函数
 func main() {
-	flag.Usage = func() {
-		printUsage()
-	}
-
 	// 初始化配置
 	if err := startup(); err != nil {
 		logs.Emergency(err.Error())
@@ -43,74 +35,16 @@ func main() {
 	}
 	defer shutdown()
 
-	// 使用 os.Args 直接解析，避免全局 pflag 干扰命令参数
-	args := os.Args[1:] // 跳过程序名
-
-	// 检查是否有 --version 或 -v
-	for _, arg := range args {
-		if arg == "--version" || arg == "-v" {
-			fmt.Println(AppVersion)
-			return
-		}
-		if arg == "--help" || arg == "-h" {
-			printUsage()
-			return
-		}
-	}
-
-	// 如果没有参数，显示帮助
-	if len(args) == 0 {
-		printUsage()
-		return
-	}
-
-	// 获取命令和参数
-	command := args[0]
-	cmdArgs := args[1:]
-
 	// 创建命令参数
 	cmdParams := &cmdCli.TCommandParams{
 		Config: &cfx,
 	}
 
-	// 执行命令
-	if err := cmdCli.Execute(command, cmdArgs, cmdParams); err != nil {
+	app := cmdCli.NewApp(AppName, AppVersion, BuildTime, cmdParams)
+
+	if err := app.Run(os.Args); err != nil {
 		logs.Emergency(err.Error())
 	}
-}
-
-func filepathJoin(elem ...string) string {
-	path := filepath.Join(elem...)
-	if runtime.GOOS == "windows" {
-		return strings.ReplaceAll(path, "\\", "/")
-	}
-	return path
-}
-
-// printUsage 打印使用说明
-func printUsage() {
-	fmt.Println("NAME:")
-	fmt.Println("   jvms - JDK Version Manager (JVMS) for Windows")
-	fmt.Println("")
-	fmt.Println("USAGE:")
-	fmt.Println("   jvms [全局选项] 命令 [命令选项] [参数...]")
-	fmt.Println("")
-	fmt.Printf("VERSION:\n   %s - %s\n", AppVersion, BuildTime)
-	fmt.Println("")
-	fmt.Println("COMMANDS:")
-	fmt.Println("   init        初始化配置文件")
-	fmt.Println("   list, ls    列出当前已安装的JDK")
-	fmt.Println("   install, i  安装可用的远程JDK")
-	fmt.Println("   switch, s   切换使用指定的版本或索引号")
-	fmt.Println("   use, u      切换使用指定的版本或索引号")
-	fmt.Println("   remove, rm  删除指定的版本")
-	fmt.Println("   rls         显示可供下载的版本列表")
-	fmt.Println("   proxy       设置下载使用的代理")
-	fmt.Println("   help, h     显示命令列表或命令帮助")
-	fmt.Println("")
-	fmt.Println("全局选项:")
-	fmt.Println("   --help, -h     显示帮助")
-	fmt.Println("   --version, -v  显示版本")
 }
 
 // startup 在应用启动前执行

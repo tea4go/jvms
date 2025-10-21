@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
 	"github.com/tea4go/jvms/utils/jdk"
@@ -16,26 +17,32 @@ import (
 // switchCmd 执行切换JDK版本的命令
 // 切换到指定版本或索引号的JDK
 // 参数:
-//   args - 命令参数
-//   cfx - 配置对象指针
+//
+//	args - 命令参数
+//	cfx - 配置对象指针
+//
 // 返回值:
-//   error - 执行错误
-func switchCmd(args []string, cfx *entity.TConfig) error {
-	return switchFunc(args, cfx)
+//
+//	error - 执行错误
+func switchCmd(ctx *cli.Context, cfx *entity.TConfig) error {
+	return switchFunc(ctx, cfx)
 }
 
 // switchFunc 切换JDK版本的处理函数
 // 参数:
-//   args - 命令参数
-//   cfx - 配置对象指针
+//
+//	args - 命令参数
+//	cfx - 配置对象指针
+//
 // 返回值:
-//   error - 执行错误
-func switchFunc(args []string, cfx *entity.TConfig) error {
-	if len(args) == 0 {
+//
+//	error - 执行错误
+func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
+	if ctx.NArg() == 0 {
 		return errors.New("您应该输入版本或索引号，输入 \"jvms list\" 查看已安装的版本")
 	}
 
-	v := args[0]
+	v := ctx.Args().First()
 
 	// 检查输入是否为数字（索引）
 	index, err := strconv.Atoi(v)

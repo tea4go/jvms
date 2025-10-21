@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/codegangsta/cli"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
 	"github.com/tea4go/jvms/utils/jdk"
@@ -15,20 +16,23 @@ import (
 // installCmd 执行安装JDK的命令
 // 从远程源下载并安装指定版本的JDK
 // 参数:
-//   args - 命令参数
-//   cfx - 配置对象指针
+//
+//	args - 命令参数
+//	cfx - 配置对象指针
+//
 // 返回值:
-//   error - 执行错误
-func installCmd(args []string, cfx *entity.TConfig) error {
+//
+//	error - 执行错误
+func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	if cfx.Proxy != "" {
 		web.SetProxy(cfx.Proxy)
 	}
 
-	if len(args) == 0 {
+	if ctx.NArg() == 0 {
 		return errors.New("无效的版本，输入 \"jvms rls\" 查看可供安装的版本")
 	}
 
-	v := args[0]
+	v := ctx.Args().First()
 
 	if jdk.IsVersionInstalled(cfx.Store, v) {
 		fmt.Println("版本 " + v + " 已经安装。")

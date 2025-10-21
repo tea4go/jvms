@@ -3,6 +3,8 @@ package cmdCli
 import (
 	"fmt"
 
+	"github.com/codegangsta/cli"
+
 	"github.com/tea4go/jvms/internal/entity"
 )
 
@@ -12,62 +14,205 @@ type TCommandParams struct {
 	Config *entity.TConfig // 配置对象指针
 }
 
-// Execute 执行指定的命令
-// 参数:
-//
-//	command - 命令名称
-//	args - 命令参数
-//	cp - 命令参数对象指针
-//
-// 返回值:
-//
-//	error - 执行错误
-func Execute(command string, args []string, cp *TCommandParams) error {
-	switch command {
-	case "init":
-		return initCmd(args, cp.Config)
-	case "list", "ls":
-		return listCmd(args, cp.Config)
-	case "install", "i":
-		return installCmd(args, cp.Config)
-	case "switch", "s":
-		return switchCmd(args, cp.Config)
-	case "use", "u":
-		return useCmd(args, cp.Config)
-	case "remove", "rm":
-		return removeCmd(args, cp.Config)
-	case "rls":
-		return rlsCmd(args, cp.Config)
-	case "proxy":
-		return proxyCmd(args, cp.Config)
-	case "help", "h":
-		return printHelp(args)
-	default:
-		return fmt.Errorf("未知命令: %s\n使用 'jvms help' 查看可用命令", command)
+// NewApp 创建 CLI 应用实例
+func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App {
+	app := cli.NewApp()
+	app.Name = appName
+	app.Version = appVersion
+	app.Usage = "JDK Version Manager (JVMS) for Windows"
+	app.Metadata = map[string]interface{}{
+		"build_time": buildTime,
 	}
-}
 
-// printHelp 打印帮助信息
-func printHelp(args []string) error {
-	if len(args) == 0 {
-		fmt.Println("JVMS - JDK Version Manager for Windows")
-		fmt.Println("")
-		fmt.Println("可用命令:")
-		fmt.Println("  init        初始化配置文件")
-		fmt.Println("  list, ls    列出当前已安装的JDK")
-		fmt.Println("  install, i  安装可用的远程JDK")
-		fmt.Println("  switch, s   切换使用指定的版本或索引号")
-		fmt.Println("  use, u      切换使用指定的版本或索引号")
-		fmt.Println("  remove, rm  删除指定的版本")
-		fmt.Println("  rls         显示可供下载的版本列表")
-		fmt.Println("  proxy       设置下载使用的代理")
-		fmt.Println("")
-		fmt.Println("使用 'jvms help <命令>' 查看命令的详细帮助")
+	app.Action = func(ctx *cli.Context) error {
+		printAppUsage(appVersion, buildTime)
 		return nil
 	}
 
-	// 这里可以添加针对具体命令的详细帮助
-	cmd := args[0]
+	app.Commands = []cli.Command{
+		newInitCommand(cp.Config),
+		newListCommand(cp.Config),
+		newInstallCommand(cp.Config),
+		newSwitchCommand(cp.Config),
+		newUseCommand(cp.Config),
+		newRemoveCommand(cp.Config),
+		newRlsCommand(cp.Config),
+		newProxyCommand(cp.Config),
+		newHelpCommand(),
+	}
+
+	app.CommandNotFound = func(ctx *cli.Context, command string) {
+		fmt.Fprintf(cli.ErrWriter, "未知命令: %s\n使用 'jvms help' 查看可用命令\n", command)
+	}
+
+	return app
+}
+
+func printAppUsage(version, buildTime string) {
+	fmt.Println("NAME:")
+	fmt.Println("   jvms - JDK Version Manager (JVMS) for Windows")
+	fmt.Println("")
+	fmt.Println("USAGE:")
+	fmt.Println("   jvms [全局选项] 命令 [命令选项] [参数...]")
+	fmt.Println("")
+	if buildTime != "" {
+		fmt.Printf("VERSION:\n   %s - %s\n", version, buildTime)
+	} else {
+		fmt.Printf("VERSION:\n   %s\n", version)
+	}
+	fmt.Println("")
+	fmt.Println("COMMANDS:")
+	fmt.Println("   init        初始化配置文件")
+	fmt.Println("   list, ls    列出当前已安装的JDK")
+	fmt.Println("   install, i  安装可用的远程JDK")
+	fmt.Println("   switch, s   切换使用指定的版本或索引号")
+	fmt.Println("   use, u      切换使用指定的版本或索引号")
+	fmt.Println("   remove, rm  删除指定的版本")
+	fmt.Println("   rls         显示可供下载的版本列表")
+	fmt.Println("   proxy       设置下载使用的代理")
+	fmt.Println("   help, h     显示命令列表或命令帮助")
+	fmt.Println("")
+	fmt.Println("全局选项:")
+	fmt.Println("   --help, -h     显示帮助")
+	fmt.Println("   --version, -v  显示版本")
+}
+
+func newInitCommand(cfx *entity.TConfig) cli.Command {
+	defaultHome := defaultJavaHome()
+	return cli.Command{
+		Name:  "init",
+		Usage: "初始化配置文件",
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "java_home",
+				Usage: fmt.Sprintf("指定 JAVA_HOME 位置 (默认: %s)", defaultHome),
+				Value: defaultHome,
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			return initCmd(ctx, cfx)
+		},
+	}
+}
+
+func newListCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:    "list",
+		Aliases: []string{"ls"},
+		Usage:   "列出当前已安装的JDK",
+		Action: func(ctx *cli.Context) error {
+			return listCmd(ctx, cfx)
+		},
+	}
+}
+
+func newInstallCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:    "install",
+		Aliases: []string{"i"},
+		Usage:   "安装可用的远程JDK",
+		Action: func(ctx *cli.Context) error {
+			return installCmd(ctx, cfx)
+		},
+	}
+}
+
+func newSwitchCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:    "switch",
+		Aliases: []string{"s"},
+		Usage:   "切换使用指定的版本或索引号",
+		Action: func(ctx *cli.Context) error {
+			return switchCmd(ctx, cfx)
+		},
+	}
+}
+
+func newUseCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:    "use",
+		Aliases: []string{"u"},
+		Usage:   "切换使用指定的版本或索引号",
+		Action: func(ctx *cli.Context) error {
+			return useCmd(ctx, cfx)
+		},
+	}
+}
+
+func newRemoveCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:    "remove",
+		Aliases: []string{"rm"},
+		Usage:   "删除指定的版本",
+		Action: func(ctx *cli.Context) error {
+			return removeCmd(ctx, cfx)
+		},
+	}
+}
+
+func newRlsCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:  "rls",
+		Usage: "显示可供下载的版本列表",
+		Flags: []cli.Flag{
+			cli.BoolFlag{
+				Name:  "all, a",
+				Usage: "列出所有版本",
+			},
+			cli.StringFlag{
+				Name:  "webtype, t",
+				Usage: "设置 OpenJDK 下载源",
+				Value: "huawei",
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			return rlsCmd(ctx, cfx)
+		},
+	}
+}
+
+func newProxyCommand(cfx *entity.TConfig) cli.Command {
+	return cli.Command{
+		Name:  "proxy",
+		Usage: "设置下载使用的代理",
+		Flags: []cli.Flag{
+			cli.BoolFlag{
+				Name:  "show",
+				Usage: "显示当前代理",
+			},
+			cli.StringFlag{
+				Name:  "set",
+				Usage: "设置代理",
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			return proxyCmd(ctx, cfx)
+		},
+	}
+}
+
+func newHelpCommand() cli.Command {
+	return cli.Command{
+		Name:    "help",
+		Aliases: []string{"h"},
+		Usage:   "显示命令列表或命令帮助",
+		Action: func(ctx *cli.Context) error {
+			return printHelp(ctx)
+		},
+	}
+}
+
+func printHelp(ctx *cli.Context) error {
+	if !ctx.Args().Present() {
+		buildTime := ""
+		if v, ok := ctx.App.Metadata["build_time"].(string); ok {
+			buildTime = v
+		}
+		printAppUsage(ctx.App.Version, buildTime)
+		return nil
+	}
+
+	cmd := ctx.Args().First()
 	switch cmd {
 	case "init":
 		fmt.Println("init - 初始化配置文件")
@@ -75,7 +220,7 @@ func printHelp(args []string) error {
 		fmt.Println("用法: jvms init [选项]")
 		fmt.Println("")
 		fmt.Println("选项:")
-		fmt.Println("  --java_home <路径>      指定 JAVA_HOME 位置")
+		fmt.Printf("  --java_home <路径>      指定 JAVA_HOME 位置 (默认: %s)\n", defaultJavaHome())
 	case "install", "i":
 		fmt.Println("install - 安装可用的远程JDK")
 		fmt.Println("")
@@ -99,13 +244,13 @@ func printHelp(args []string) error {
 	case "rls":
 		fmt.Println("rls - 显示可供下载的版本列表")
 		fmt.Println("")
-		fmt.Println("用法: jvms rls [-a] [t]")
+		fmt.Println("用法: jvms rls [选项]")
 		fmt.Println("")
 		fmt.Println("选项:")
-		fmt.Println("  --all     -a    列出所有版本")
-		fmt.Println("  --webtype -w    设置OpenJDK下载源")
+		fmt.Println("  --all, -a        列出所有版本")
+		fmt.Println("  --webtype, -t    设置 OpenJDK 下载源")
 		fmt.Println("")
-		fmt.Println("OpenJDK下载源")
+		fmt.Println("OpenJDK 下载源:")
 		fmt.Println("  lzu      - 兰州大学开源软件镜像站")
 		fmt.Println("  tuna     - 清华大学开源软件镜像站")
 		fmt.Println("  injdk    - InJDK 网站")
