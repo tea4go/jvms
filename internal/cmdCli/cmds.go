@@ -85,7 +85,7 @@ func newInitCommand(cfx *entity.TConfig) *cli.Command {
 		Name:  "init",
 		Usage: "初始化配置文件",
 		Flags: []cli.Flag{
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "java_home",
 				Usage: fmt.Sprintf("指定 JAVA_HOME 位置 (默认: %s)", defaultHome),
 				Value: defaultHome,
@@ -157,11 +157,11 @@ func newRlsCommand(cfx *entity.TConfig) *cli.Command {
 		Name:  "rls",
 		Usage: "显示可供下载的版本列表",
 		Flags: []cli.Flag{
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  "all, a",
 				Usage: "列出所有版本",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "webtype, t",
 				Usage: "设置 OpenJDK 下载源",
 				Value: "huawei",
@@ -178,11 +178,11 @@ func newProxyCommand(cfx *entity.TConfig) *cli.Command {
 		Name:  "proxy",
 		Usage: "设置下载使用的代理",
 		Flags: []cli.Flag{
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  "show",
 				Usage: "显示当前代理",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "set",
 				Usage: "设置代理",
 			},
