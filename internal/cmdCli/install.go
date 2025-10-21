@@ -79,6 +79,7 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 					return fmt.Errorf("当前下载的 %s 为无效版本，请手工检查 %s", v, jdktempfile)
 				}
 
+				logs.Debug("配置所在目录：%s", cfx.Store)
 				destJavaHome := filepath.Join(cfx.Store, v)
 				logs.Debug("移动目录 %s -> %s", temJavaHome, destJavaHome)
 				err = os.Rename(temJavaHome, destJavaHome)
@@ -94,7 +95,7 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 				}
 
 				fmt.Println("安装成功完成。")
-				fmt.Printf("如果您想使用此版本，请执行 jvms switch %v", v)
+				fmt.Printf("如果您想使用此版本，请执行 jvms switch %v\n", v)
 			} else {
 				return fmt.Errorf("无法下载 %s 版本", v)
 			}
