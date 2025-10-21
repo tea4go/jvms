@@ -60,7 +60,7 @@ func main() {
 //
 //	error - 初始化失败时返回错误
 func startup() error {
-	//logs.Debug("加载配置 jvms.json 文件")
+	logs.Debug("加载配置 jvms.json 文件")
 	// 注册 JSON 格式的配置存储器
 	store.Register(
 		"json",

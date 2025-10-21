@@ -157,7 +157,7 @@ func setJavaHomeUnix(javaHome string) error {
 		// 读取现有配置
 		data, err := os.ReadFile(configFile)
 		if err != nil {
-			fmt.Printf("⚠️警告: 读取 %s 失败，%v\n", configFile, err)
+			fmt.Printf("⚠️ 警告: 读取 %s 失败，%v\n", configFile, err)
 			continue
 		}
 		content := string(data)
@@ -191,7 +191,7 @@ func setJavaHomeUnix(javaHome string) error {
 		// 写回配置文件
 		err = os.WriteFile(configFile, []byte(newContent), 0644)
 		if err != nil {
-			fmt.Printf("⚠️警告: 写入 %s 失败，%v\n", configFile, err)
+			fmt.Printf("⚠️ 警告: 写入 %s 失败，%v\n", configFile, err)
 			continue
 		}
 
@@ -207,7 +207,7 @@ func setJavaHomeUnix(javaHome string) error {
 		return fmt.Errorf("未找到任何配置文件 (.zshrc, .bashrc, .bash_profile)")
 	}
 
-	fmt.Println("✓已更新以下配置文件:")
+	fmt.Println("✓ 已更新以下配置文件:")
 	for k, f := range updatedFiles {
 		fmt.Printf("%d - %s\n", k, f)
 	}
@@ -231,7 +231,7 @@ func setJavaHomeUnix(javaHome string) error {
 		sourceFile = updatedFiles[0] // 使用第一个更新的文件
 	}
 
-	fmt.Printf("\n💡提示: 运行以下命令使配置立即生效:\n")
+	fmt.Printf("\n💡 提示: 运行以下命令使配置立即生效:\n")
 	fmt.Printf("   source %s\n", sourceFile)
 
 	return nil
