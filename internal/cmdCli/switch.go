@@ -13,7 +13,7 @@ import (
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
 	"github.com/tea4go/jvms/utils/jdk"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // switchCmd 执行切换JDK版本的命令

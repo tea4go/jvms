@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tea4go/jvms/internal/entity"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // proxyCmd 执行代理设置命令

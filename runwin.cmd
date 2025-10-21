@@ -68,5 +68,5 @@ echo 2 - 运行程序
 echo =============================================================
 del jdkdlindex.json
 echo %app_name% -v
-%app_name% -v
+%app_name% --help
 rem %app_name% rls -t lzu -a

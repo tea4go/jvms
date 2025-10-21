@@ -5,7 +5,7 @@ import (
 
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/web"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // rlsCmd 执行显示可下载版本列表的命令

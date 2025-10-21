@@ -3,7 +3,7 @@ package cmdCli
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 
 	"github.com/tea4go/jvms/internal/entity"
 )
@@ -18,6 +18,7 @@ type TCommandParams struct {
 func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App {
 	app := cli.NewApp()
 	app.Name = appName
+	app.HideHelp = true
 	app.Version = appVersion
 	app.Usage = "JDK Version Manager (JVMS) for Windows"
 	app.Metadata = map[string]interface{}{
@@ -25,11 +26,12 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 	}
 
 	app.Action = func(ctx *cli.Context) error {
+		fmt.Println("NewApp")
 		printAppUsage(appVersion, buildTime)
 		return nil
 	}
 
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		newInitCommand(cp.Config),
 		newListCommand(cp.Config),
 		newInstallCommand(cp.Config),
@@ -77,9 +79,9 @@ func printAppUsage(version, buildTime string) {
 	fmt.Println("   --version, -v  显示版本")
 }
 
-func newInitCommand(cfx *entity.TConfig) cli.Command {
+func newInitCommand(cfx *entity.TConfig) *cli.Command {
 	defaultHome := defaultJavaHome()
-	return cli.Command{
+	return &cli.Command{
 		Name:  "init",
 		Usage: "初始化配置文件",
 		Flags: []cli.Flag{
@@ -95,8 +97,8 @@ func newInitCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newListCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newListCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:    "list",
 		Aliases: []string{"ls"},
 		Usage:   "列出当前已安装的JDK",
@@ -106,8 +108,8 @@ func newListCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newInstallCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newInstallCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:    "install",
 		Aliases: []string{"i"},
 		Usage:   "安装可用的远程JDK",
@@ -117,8 +119,8 @@ func newInstallCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newSwitchCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newSwitchCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:    "switch",
 		Aliases: []string{"s"},
 		Usage:   "切换使用指定的版本或索引号",
@@ -128,8 +130,8 @@ func newSwitchCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newUseCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newUseCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:    "use",
 		Aliases: []string{"u"},
 		Usage:   "切换使用指定的版本或索引号",
@@ -139,8 +141,8 @@ func newUseCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newRemoveCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newRemoveCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:    "remove",
 		Aliases: []string{"rm"},
 		Usage:   "删除指定的版本",
@@ -150,8 +152,8 @@ func newRemoveCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newRlsCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newRlsCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:  "rls",
 		Usage: "显示可供下载的版本列表",
 		Flags: []cli.Flag{
@@ -171,8 +173,8 @@ func newRlsCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newProxyCommand(cfx *entity.TConfig) cli.Command {
-	return cli.Command{
+func newProxyCommand(cfx *entity.TConfig) *cli.Command {
+	return &cli.Command{
 		Name:  "proxy",
 		Usage: "设置下载使用的代理",
 		Flags: []cli.Flag{
@@ -191,23 +193,27 @@ func newProxyCommand(cfx *entity.TConfig) cli.Command {
 	}
 }
 
-func newHelpCommand() cli.Command {
-	return cli.Command{
+func newHelpCommand() *cli.Command {
+	return &cli.Command{
 		Name:    "help",
-		Aliases: []string{"h"},
+		Aliases: []string{"x"},
 		Usage:   "显示命令列表或命令帮助",
 		Action: func(ctx *cli.Context) error {
+			fmt.Println("newHelpCommand")
 			return printHelp(ctx)
 		},
 	}
 }
 
 func printHelp(ctx *cli.Context) error {
+	fmt.Println("printHelp")
 	if !ctx.Args().Present() {
 		buildTime := ""
 		if v, ok := ctx.App.Metadata["build_time"].(string); ok {
 			buildTime = v
 		}
+
+		fmt.Println("printHelp =======================")
 		printAppUsage(ctx.App.Version, buildTime)
 		return nil
 	}

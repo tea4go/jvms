@@ -5,6 +5,9 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
+	"fmt"
+
 	"os"
 	"path/filepath"
 
@@ -28,6 +31,13 @@ var cfx entity.TConfig
 
 // main 是程序的入口函数
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+	logs.SetLevel(7)
+	logs.StartLogger()
+
 	// 初始化配置
 	if err := startup(); err != nil {
 		logs.Emergency(err.Error())
@@ -41,7 +51,7 @@ func main() {
 	}
 
 	app := cmdCli.NewApp(AppName, AppVersion, BuildTime, cmdParams)
-
+	fmt.Printf("%+v\n", os.Args)
 	if err := app.Run(os.Args); err != nil {
 		logs.Emergency(err.Error())
 	}
@@ -58,10 +68,11 @@ func main() {
 //
 //	error - 初始化失败时返回错误
 func startup() error {
+	logs.Debug("加载配置 jvms.json 文件")
 	// 注册 JSON 格式的配置存储器
 	store.Register(
 		"json",
-		func(v interface{}) ([]byte, error) {
+		func(v any) ([]byte, error) {
 			return json.MarshalIndent(v, "", "    ")
 		},
 		json.Unmarshal)
@@ -94,6 +105,7 @@ func startup() error {
 // shutdown 在应用关闭后执行
 // 主要功能：保存配置到 jvms.json 文件
 func shutdown() {
+	logs.Debug("保存配置到 jvms.json 文件")
 	if err := store.Save("jvms.json", &cfx); err != nil {
 		logs.Warning("警告: 保存配置失败: %s\n", err.Error())
 	}

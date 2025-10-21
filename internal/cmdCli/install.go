@@ -10,7 +10,7 @@ import (
 	"github.com/tea4go/jvms/utils/file"
 	"github.com/tea4go/jvms/utils/jdk"
 	"github.com/tea4go/jvms/utils/web"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // installCmd 执行安装JDK的命令

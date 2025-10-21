@@ -9,7 +9,7 @@ import (
 
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // initCmd 执行初始化命令

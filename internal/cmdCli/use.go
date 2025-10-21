@@ -2,7 +2,7 @@ package cmdCli
 
 import (
 	"github.com/tea4go/jvms/internal/entity"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // useCmd 执行使用JDK版本的命令
