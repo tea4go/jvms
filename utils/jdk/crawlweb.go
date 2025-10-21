@@ -519,7 +519,7 @@ func getVerDirs(url string) ([]string, error) {
 		cleanLinks = append(cleanLinks, cleanLink)
 	}
 
-	logs.Debug("找到 %d 个版本目录", len(cleanLinks))
+	logs.Info("找到 %d 个JDK下载地址", len(cleanLinks))
 	return cleanLinks, nil
 }
 

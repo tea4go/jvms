@@ -68,5 +68,7 @@ echo 2 - 运行程序
 echo =============================================================
 del jdkdlindex.json   >nul 2>nul
 
-rem %app_name% rls -t lzu -a
-%app_name% -l=7 version
+%app_name% -l=6 rls -t lzu -a
+
+echo =============================================================
+echo %app_name% -l=6 rls -t lzu -a
