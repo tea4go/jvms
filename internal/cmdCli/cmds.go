@@ -19,6 +19,8 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 	app := cli.NewApp()
 	app.Name = appName
 	app.HideHelp = true
+	app.HideHelpCommand = true
+	app.SkipFlagParsing = true
 	app.Version = appVersion
 	app.Usage = "JDK Version Manager (JVMS) for Windows"
 	app.Metadata = map[string]interface{}{

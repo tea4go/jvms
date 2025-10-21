@@ -35,12 +35,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
 	}
-	logs.SetLevel(7)
+	logs.SetLevel(5)
 	logs.StartLogger()
 
 	// 初始化配置
 	if err := startup(); err != nil {
-		logs.Emergency(err.Error())
+		fmt.Println(err.Error())
 		return
 	}
 	defer shutdown()
@@ -51,9 +51,8 @@ func main() {
 	}
 
 	app := cmdCli.NewApp(AppName, AppVersion, BuildTime, cmdParams)
-	fmt.Printf("%+v\n", os.Args)
 	if err := app.Run(os.Args); err != nil {
-		logs.Emergency(err.Error())
+		fmt.Println(err.Error())
 	}
 }
 
@@ -68,7 +67,7 @@ func main() {
 //
 //	error - 初始化失败时返回错误
 func startup() error {
-	logs.Debug("加载配置 jvms.json 文件")
+	//logs.Debug("加载配置 jvms.json 文件")
 	// 注册 JSON 格式的配置存储器
 	store.Register(
 		"json",
@@ -82,11 +81,17 @@ func startup() error {
 
 	// 加载配置文件
 	if err := store.Load("jvms.json", &cfx); err != nil {
-		return errors.New("failed to load the config:" + err.Error())
+		return errors.New("加载配置 jvms.json 失败，" + err.Error())
 	}
 
 	// 获取当前可执行文件所在路径
 	s := file.GetCurrentPath()
+
+	// 是否显示所有JDK
+	cfx.WebAll = false
+
+	// 下载源
+	cfx.WebType = "huawei"
 
 	// 设置 JDK 存储目录路径
 	cfx.Store = filepath.Join(s, "store")
@@ -105,8 +110,7 @@ func startup() error {
 // shutdown 在应用关闭后执行
 // 主要功能：保存配置到 jvms.json 文件
 func shutdown() {
-	logs.Debug("保存配置到 jvms.json 文件")
 	if err := store.Save("jvms.json", &cfx); err != nil {
-		logs.Warning("警告: 保存配置失败: %s\n", err.Error())
+		fmt.Println("警告: 保存配置失败，", err.Error())
 	}
 }

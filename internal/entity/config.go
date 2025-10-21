@@ -9,7 +9,7 @@ type TConfig struct {
 	// JDK下载来源
 	WebType string `json:"web_type"`
 	// 是否全部JDK，如果为否，则一个大版本只保留一个
-	WebAll bool `json:"web_type"`
+	WebAll bool `json:"web_all"`
 	// Proxy 代理服务器地址
 	Proxy string `json:"proxy"`
 	// Store JDK存储路径
