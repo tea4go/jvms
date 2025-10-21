@@ -36,9 +36,9 @@ func initCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	cmd := exec.Command("cmd", "/C", "setx", "JAVA_HOME", cfx.JavaHome, "/M")
 	err := cmd.Run()
 	if err != nil {
-		return errors.New("设置环境变量 `JAVA_HOME` 失败: 请以管理员身份运行")
+		return errors.New("设置环境变量 JAVA_HOME 失败: 请以管理员身份运行")
 	}
-	fmt.Println("设置 `JAVA_HOME` 环境变量为 ", cfx.JavaHome)
+	fmt.Println("设置 JAVA_HOME 环境变量为 ", cfx.JavaHome)
 
 	// 设置 PATH
 	path := fmt.Sprintf(`%s/bin;%s;%s`, cfx.JavaHome, os.Getenv("PATH"), file.GetCurrentPath())

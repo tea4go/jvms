@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	logs "github.com/tea4go/gh/log4go"
 	"github.com/tea4go/jvms/utils/file"
 )
 
@@ -44,6 +45,7 @@ func GetInstalled(root string) []string {
 	files, _ := os.ReadDir(root)
 	for i := len(files) - 1; i >= 0; i-- {
 		if files[i].IsDir() {
+			logs.Debug("%d - %s", i+1, files[i].Name())
 			list = append(list, files[i].Name())
 		}
 	}
@@ -61,6 +63,7 @@ func GetInstalled(root string) []string {
 //	bool - 已安装返回 true，否则返回 false
 func IsVersionInstalled(root string, version string) bool {
 	javacPath := filepath.Join(root, version, "bin", GetJavacName())
+	logs.Debug("检查JDK是否安装 - %s", javacPath)
 	return file.Exists(javacPath)
 }
 

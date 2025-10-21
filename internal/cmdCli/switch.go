@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	logs "github.com/tea4go/gh/log4go"
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/tea4go/jvms/utils/file"
 	"github.com/tea4go/jvms/utils/jdk"
@@ -40,10 +41,13 @@ func switchCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 //
 //	error - 执行错误
 func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
+	logs.Debug("切换JDK版本 - %s", cfx.Store)
 	if ctx.NArg() == 0 {
 		return errors.New("您应该输入版本或索引号，输入 \"jvms list\" 查看已安装的版本")
 	}
-
+	if cfx.JavaHome == "" {
+		return errors.New("您先执行 init 命令，初始化 JAVA_HOME 目录")
+	}
 	v := ctx.Args().First()
 
 	// 检查输入是否为数字（索引）
@@ -52,19 +56,19 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 		// 输入是有效的数字，获取已安装的JDK列表
 		installedJDKs := jdk.GetInstalled(cfx.Store)
 		if len(installedJDKs) == 0 {
-			return errors.New("未找到已安装的JDK")
+			return errors.New("没有可用的JDK版本")
 		}
 
 		if index > len(installedJDKs) {
-			return fmt.Errorf("无效的索引: %d，应该在 1 到 %d 之间", index, len(installedJDKs))
+			return fmt.Errorf("无效的索引 %d，应该为(1~%d)", index, len(installedJDKs))
 		}
 
 		v = installedJDKs[index-1]
-		fmt.Printf("使用索引 %d 选择 JDK %s\n", index, v)
+		fmt.Printf("选择 %d - %s\n", index, v)
 	}
 
 	if !jdk.IsVersionInstalled(cfx.Store, v) {
-		fmt.Printf("jdk %s 未安装。", v)
+		fmt.Printf("未安装JDK版本为 %s\n", v)
 		return nil
 	}
 
@@ -72,7 +76,7 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 	if file.Exists(cfx.JavaHome) {
 		err := os.Remove(cfx.JavaHome)
 		if err != nil {
-			return errors.New("切换 jdk 失败，请手动删除 " + cfx.JavaHome)
+			return errors.New("切换 JDK版本 失败，请手动删除 " + cfx.JavaHome)
 		}
 	}
 
@@ -99,27 +103,31 @@ func setJavaHome(javaHome string) error {
 	case "darwin", "linux":
 		return setJavaHomeUnix(javaHome)
 	default:
-		return fmt.Errorf("不支持的操作系统: %s", runtime.GOOS)
+		return fmt.Errorf("不支持的操作系统 (%s)", runtime.GOOS)
 	}
 }
 
 // setJavaHomeWindows Windows 下设置环境变量
 func setJavaHomeWindows(javaHome string) error {
+	logs.Debug("setx JAVA_HOME=%s /M", javaHome)
 	cmd := exec.Command("cmd", "/C", "setx", "JAVA_HOME", javaHome, "/M")
 	err := cmd.Run()
 	if err != nil {
-		return errors.New("设置环境变量 `JAVA_HOME` 失败: 请以管理员身份运行")
+		return errors.New("设置环境变量 JAVA_HOME 失败，请以管理员身份运行")
 	}
 	return nil
 }
 
 // setJavaHomeUnix Unix 系统（macOS/Linux）下设置环境变量
 func setJavaHomeUnix(javaHome string) error {
+	if javaHome == "" {
+		return fmt.Errorf("JavaHome目录没配置，请先执行 init 命令")
+	}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return fmt.Errorf("获取用户主目录失败: %v", err)
+		return fmt.Errorf("获取用户主目录失败，%v", err)
 	}
-	fmt.Print("开始设置环境变量")
+	logs.Debug("开始设置环境变量")
 
 	// 需要更新的配置文件列表
 	configFiles := []string{
@@ -144,11 +152,12 @@ func setJavaHomeUnix(javaHome string) error {
 		if !file.Exists(configFile) {
 			continue
 		}
+		logs.Debug("加载文件 %s ......", configFile)
 
 		// 读取现有配置
 		data, err := os.ReadFile(configFile)
 		if err != nil {
-			fmt.Printf("⚠️  警告: 读取 %s 失败: %v\n", configFile, err)
+			fmt.Printf("⚠️警告: 读取 %s 失败，%v\n", configFile, err)
 			continue
 		}
 		content := string(data)
@@ -160,6 +169,7 @@ func setJavaHomeUnix(javaHome string) error {
 			// 替换现有配置
 			startIdx := strings.Index(content, jvmsStart)
 			endIdx := strings.Index(content, jvmsEnd)
+			logs.Debug("发现残留配置 (%d~%d)", startIdx, endIdx)
 
 			if endIdx > startIdx {
 				// 找到完整的配置块，替换它
@@ -170,7 +180,7 @@ func setJavaHomeUnix(javaHome string) error {
 				newContent = strings.Replace(content, jvmsStart, "", 1) + "\n" + newConfig
 			}
 		} else {
-			// 追加新配置
+			logs.Debug("尾部追加新配置")
 			// 确保文件末尾有换行符
 			if !strings.HasSuffix(content, "\n") {
 				content += "\n"
@@ -181,7 +191,7 @@ func setJavaHomeUnix(javaHome string) error {
 		// 写回配置文件
 		err = os.WriteFile(configFile, []byte(newContent), 0644)
 		if err != nil {
-			fmt.Printf("⚠️  警告: 写入 %s 失败: %v\n", configFile, err)
+			fmt.Printf("⚠️警告: 写入 %s 失败，%v\n", configFile, err)
 			continue
 		}
 
@@ -189,6 +199,7 @@ func setJavaHomeUnix(javaHome string) error {
 	}
 
 	// 设置当前会话的环境变量
+	logs.Debug("export JAVA_HOME=%s", javaHome)
 	os.Setenv("JAVA_HOME", javaHome)
 
 	// 输出更新结果
@@ -196,9 +207,9 @@ func setJavaHomeUnix(javaHome string) error {
 		return fmt.Errorf("未找到任何配置文件 (.zshrc, .bashrc, .bash_profile)")
 	}
 
-	fmt.Println("✓ 已更新以下配置文件:")
-	for _, f := range updatedFiles {
-		fmt.Printf("  - %s\n", f)
+	fmt.Println("✓已更新以下配置文件:")
+	for k, f := range updatedFiles {
+		fmt.Printf("%d - %s\n", k, f)
 	}
 
 	// 检测当前使用的 shell 并给出提示
@@ -220,7 +231,7 @@ func setJavaHomeUnix(javaHome string) error {
 		sourceFile = updatedFiles[0] // 使用第一个更新的文件
 	}
 
-	fmt.Printf("\n💡 提示: 运行以下命令使配置立即生效:\n")
+	fmt.Printf("\n💡提示: 运行以下命令使配置立即生效:\n")
 	fmt.Printf("   source %s\n", sourceFile)
 
 	return nil

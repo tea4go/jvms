@@ -68,7 +68,7 @@ echo 2 - 运行程序
 echo =============================================================
 del jdkdlindex.json   >nul 2>nul
 
-%app_name% -l=6 rls -t lzu -a
+%app_name% -l=7 use 13334ccc
 
 echo =============================================================
 echo %app_name% -l=6 rls -t lzu -a

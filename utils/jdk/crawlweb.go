@@ -166,7 +166,7 @@ func fetchHTML(url string) (string, error) {
 	// 创建请求并设置 User-Agent（某些网站可能检查 User-Agent）
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", fmt.Errorf("创建请求失败: %v", err)
+		return "", fmt.Errorf("创建请求失败，%v", err)
 	}
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 
@@ -179,13 +179,13 @@ func fetchHTML(url string) (string, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("获取网页失败: %v", err)
+		return "", fmt.Errorf("获取网页失败，%v", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("读取网页内容失败: %v", err)
+		return "", fmt.Errorf("读取网页内容失败，%v", err)
 	}
 
 	return string(body), nil
@@ -202,7 +202,7 @@ func fetchHTML(url string) (string, error) {
 func parseLinks(htmlContent string, pattern string) ([]string, error) {
 	doc, err := html.Parse(strings.NewReader(htmlContent))
 	if err != nil {
-		return nil, fmt.Errorf("解析 HTML 失败: %v", err)
+		return nil, fmt.Errorf("解析 HTML 失败，%v", err)
 	}
 
 	var links []string
@@ -247,7 +247,7 @@ func parseLinks(htmlContent string, pattern string) ([]string, error) {
 func parseFileTable(htmlContent string, pattern string) ([]TWebFileInfo, error) {
 	doc, err := html.Parse(strings.NewReader(htmlContent))
 	if err != nil {
-		return nil, fmt.Errorf("解析 HTML 失败: %v", err)
+		return nil, fmt.Errorf("解析 HTML 失败，%v", err)
 	}
 
 	var files []TWebFileInfo
@@ -378,7 +378,7 @@ func parseFileListHuawei(htmlContent string, pattern string) ([]TWebFileInfo, er
 func parseFileTableInjdk(htmlContent string, pattern string) ([]TWebFileInfo, error) {
 	doc, err := html.Parse(strings.NewReader(htmlContent))
 	if err != nil {
-		return nil, fmt.Errorf("解析 HTML 失败: %v", err)
+		return nil, fmt.Errorf("解析 HTML 失败，%v", err)
 	}
 
 	var files []TWebFileInfo
@@ -661,13 +661,13 @@ func saveToJSON(downloads []TOpenJDK, filename string) error {
 	// 格式化 JSON，使用缩进
 	data, err := json.MarshalIndent(downloads, "", "  ")
 	if err != nil {
-		return fmt.Errorf("JSON 序列化失败: %v", err)
+		return fmt.Errorf("JSON 序列化失败，%v", err)
 	}
 
 	// 写入文件
 	err = os.WriteFile(filename, data, 0644)
 	if err != nil {
-		return fmt.Errorf("写入文件失败: %v", err)
+		return fmt.Errorf("写入文件失败，%v", err)
 	}
 
 	logs.Debug("成功保存 %d 个下载地址到 %s", len(downloads), filename)
@@ -702,7 +702,7 @@ func (s *TWebTuna) ParseURL() ([]TOpenJDK, error) {
 		// 3. 获取 jdk 目录
 		jdkDir, err := getJDKDirectory(versionURL)
 		if err != nil {
-			logs.Warning("  获取jdk目录失败: %v", err)
+			logs.Warning("  获取jdk目录失败，%v", err)
 			continue
 		}
 		jdkURL := versionURL + jdkDir
@@ -710,7 +710,7 @@ func (s *TWebTuna) ParseURL() ([]TOpenJDK, error) {
 		// 4. 获取架构目录
 		archs, err := getArchDirs(jdkURL)
 		if err != nil {
-			logs.Warning("  获取架构目录失败: %v", err)
+			logs.Warning("  获取架构目录失败，%v", err)
 			continue
 		}
 
@@ -727,7 +727,7 @@ func (s *TWebTuna) ParseURL() ([]TOpenJDK, error) {
 			// 6. 获取操作系统目录
 			osDirs, err := getOSDirs(archURL)
 			if err != nil {
-				logs.Warning("获取操作系统目录失败: %v", err)
+				logs.Warning("获取操作系统目录失败，%v", err)
 				continue
 			}
 
@@ -744,7 +744,7 @@ func (s *TWebTuna) ParseURL() ([]TOpenJDK, error) {
 				// 8. 获取 JDK 文件
 				downloads, err := s.GetJDKFiles(osURL, osDir, arch)
 				if err != nil {
-					logs.Warning("获取文件失败: %v", err)
+					logs.Warning("获取文件失败，%v", err)
 					continue
 				}
 
@@ -836,7 +836,7 @@ func (s *TWebLzu) ParseURL() ([]TOpenJDK, error) {
 		// 8. 获取 JDK 文件
 		downloads, err := s.GetJDKFiles(versionURL)
 		if err != nil {
-			logs.Warning("获取文件失败: %v", err)
+			logs.Warning("获取文件失败，%v", err)
 			continue
 		}
 
@@ -967,7 +967,7 @@ func (s *TWebInjdk) ParseURL() ([]TOpenJDK, error) {
 		// 3. 获取 JDK 文件
 		downloads, err := s.GetJDKFiles(versionURL)
 		if err != nil {
-			logs.Warning("获取文件失败: %v", err)
+			logs.Warning("获取文件失败，%v", err)
 			continue
 		}
 
@@ -1165,7 +1165,7 @@ func (s *TWebHuawei) ParseURL() ([]TOpenJDK, error) {
 		// 3. 获取 JDK 文件
 		downloads, err := s.GetJDKFiles(versionURL)
 		if err != nil {
-			logs.Warning("获取文件失败: %v", err)
+			logs.Warning("获取文件失败，%v", err)
 			continue
 		}
 
@@ -1354,7 +1354,7 @@ func (s *TWebAzul) FetchJDKList(apiURL string, goos string, goarch string) ([]TO
 	// 创建 HTTP 请求
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("创建请求失败: %v", err)
+		return nil, fmt.Errorf("创建请求失败，%v", err)
 	}
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
 
@@ -1368,21 +1368,21 @@ func (s *TWebAzul) FetchJDKList(apiURL string, goos string, goarch string) ([]TO
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("请求失败: %v", err)
+		return nil, fmt.Errorf("请求失败，%v", err)
 	}
 	defer resp.Body.Close()
 
 	// 读取响应
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %v", err)
+		return nil, fmt.Errorf("读取响应失败，%v", err)
 	}
 
 	// 解析 JSON
 	var azulJDKs []TAzulJDK
 	err = json.Unmarshal(body, &azulJDKs)
 	if err != nil {
-		return nil, fmt.Errorf("解析 JSON 失败: %v", err)
+		return nil, fmt.Errorf("解析 JSON 失败，%v", err)
 	}
 
 	// 转换为 TOpenJDK 格式
@@ -1485,7 +1485,7 @@ func (s *TWebAdoptium) ParseURL() ([]TOpenJDK, error) {
 	// 1. 获取所有可用的版本
 	releases, err := s.GetAvailableReleases()
 	if err != nil {
-		return nil, fmt.Errorf("获取可用版本失败: %v", err)
+		return nil, fmt.Errorf("获取可用版本失败，%v", err)
 	}
 
 	logs.Debug("找到 %d 个可用版本", len(releases))
@@ -1539,7 +1539,7 @@ func (s *TWebAdoptium) GetAvailableReleases() ([]int, error) {
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("创建请求失败: %v", err)
+		return nil, fmt.Errorf("创建请求失败，%v", err)
 	}
 	req.Header.Set("User-Agent", "Mozilla/5.0")
 
@@ -1552,19 +1552,19 @@ func (s *TWebAdoptium) GetAvailableReleases() ([]int, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("请求失败: %v", err)
+		return nil, fmt.Errorf("请求失败，%v", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %v", err)
+		return nil, fmt.Errorf("读取响应失败，%v", err)
 	}
 
 	var releases TAdoptiumReleases
 	err = json.Unmarshal(body, &releases)
 	if err != nil {
-		return nil, fmt.Errorf("解析 JSON 失败: %v", err)
+		return nil, fmt.Errorf("解析 JSON 失败，%v", err)
 	}
 
 	return releases.AvailableReleases, nil
@@ -1588,7 +1588,7 @@ func (s *TWebAdoptium) FetchJDKForPlatform(version int, os, arch, goos, goarch s
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("创建请求失败: %v", err)
+		return nil, fmt.Errorf("创建请求失败，%v", err)
 	}
 	req.Header.Set("User-Agent", "Mozilla/5.0")
 
@@ -1601,20 +1601,20 @@ func (s *TWebAdoptium) FetchJDKForPlatform(version int, os, arch, goos, goarch s
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("请求失败: %v", err)
+		return nil, fmt.Errorf("请求失败，%v", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %v", err)
+		return nil, fmt.Errorf("读取响应失败，%v", err)
 	}
 
 	// 解析 JSON
 	var assets []TAdoptiumAsset
 	err = json.Unmarshal(body, &assets)
 	if err != nil {
-		return nil, fmt.Errorf("解析 JSON 失败: %v", err)
+		return nil, fmt.Errorf("解析 JSON 失败，%v", err)
 	}
 
 	// 转换为 TOpenJDK 格式

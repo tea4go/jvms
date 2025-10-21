@@ -85,7 +85,7 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 				// 可以考虑保留临时文件
 				err = os.RemoveAll(jdktempfile)
 				if err != nil {
-					fmt.Printf("警告: 清理临时目录失败: %v\n", err)
+					fmt.Printf("警告: 清理临时目录失败，%v\n", err)
 				}
 
 				fmt.Printf("安装成功完成。如果您想使用此版本，请使用: jvms switch %v", v)
