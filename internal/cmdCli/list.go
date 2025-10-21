@@ -19,13 +19,13 @@ import (
 //
 //	error - 执行错误
 func listCmd(ctx *cli.Context, cfx *entity.TConfig) error {
-	fmt.Println("已安装的 jdk (* 标记正在使用):")
+	fmt.Println("已安装的JDK列表 (标记 * 为正在使用)")
 	v := jdk.GetInstalled(cfx.Store)
 	for i, version := range v {
 		if cfx.CurrentJDKVersion == version {
-			fmt.Printf("* %d) %s\n", i+1, version)
+			fmt.Printf("* %d - %s\n", i+1, version)
 		} else {
-			fmt.Printf("  %d) %s\n", i+1, version)
+			fmt.Printf("  %d - %s\n", i+1, version)
 		}
 	}
 	if len(v) == 0 {
