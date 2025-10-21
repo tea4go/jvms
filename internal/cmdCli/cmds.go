@@ -5,6 +5,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	logs "github.com/tea4go/gh/log4go"
 	"github.com/tea4go/jvms/internal/entity"
 )
 
@@ -28,19 +29,23 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 	}
 
 	app.Action = func(ctx *cli.Context) error {
-		fmt.Printf("LogLevel - loglevel: %d\n", ctx.Int("loglevel"))
-		fmt.Printf("LogLevel - l: %d\n", ctx.Int("l"))
 		printAppUsage(appVersion, buildTime)
 		return nil
 	}
 
 	app.Flags = []cli.Flag{
 		&cli.IntFlag{
-			Name:        "loglevel",
-			Aliases:     []string{"l"},
-			Value:       5,
-			Usage:       "language for the greeting",
-			Destination: &cp.Config.LogLevel,
+			Name:    "loglevel",
+			Aliases: []string{"l"},
+			Value:   5,
+			Usage:   "日志级别(1~7)",
+			Action: func(ctx *cli.Context, v int) error {
+				if v <= 7 || v > 0 {
+					logs.SetLevel(v)
+					return nil
+				}
+				return fmt.Errorf("日志级别错误(1~7) - %d", v)
+			},
 		},
 	}
 
@@ -88,6 +93,9 @@ func printAppUsage(version, buildTime string) {
 	fmt.Println("   proxy       设置下载使用的代理")
 	fmt.Println("   help, h     显示命令列表或命令帮助，例如：help rls")
 	fmt.Println("   version, v  显示版本号")
+	fmt.Println("")
+	fmt.Println("OPTIONS:")
+	fmt.Println("   --loglevel,-l 日志级别")
 }
 
 func newInitCommand(cfx *entity.TConfig) *cli.Command {

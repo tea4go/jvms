@@ -6,9 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	flag "github.com/spf13/pflag"
-
 	"os"
 	"path/filepath"
 
@@ -32,9 +29,7 @@ var cfx entity.TConfig
 
 // main 是程序的入口函数
 func main() {
-	flag.Parse()
 	logs.StartLogger()
-	logs.SetLevel(5)
 
 	// 初始化配置
 	if err := startup(); err != nil {

@@ -16,6 +16,4 @@ type TConfig struct {
 	Store string
 	// Download JDK下载路径
 	Download string
-	// 日志级别
-	LogLevel int
 }
