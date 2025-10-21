@@ -53,14 +53,14 @@ if errorlevel 1 (
 )
 
 :: 获取版本号信息
-:: echo %app_name%.exe -v
-%app_name%.exe -v >nul 2>nul
+:: echo %app_name%.exe version
+%app_name%.exe version >nul 2>nul
 if errorlevel 1 (
-    echo [E] 获取版本失败，请确认是否有 -v 参数。
+    echo [E] 获取版本失败，请确认是否有 version 参数。
     exit /b 1
 )
 
-for /f "delims=" %%a in ('%app_name%.exe -v') do @set "app_version=%%a"
+for /f "delims=" %%a in ('%app_name%.exe version') do @set "app_version=%%a"
 echo 当前版本：%app_version%
 
 
@@ -68,5 +68,5 @@ echo 2 - 运行程序
 echo =============================================================
 del jdkdlindex.json   >nul 2>nul
 
-%app_name% rls -t lzu -a
 rem %app_name% rls -t lzu -a
+%app_name% -l=7 version

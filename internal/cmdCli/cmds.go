@@ -20,7 +20,7 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 	app.Name = appName
 	app.HideHelp = true
 	app.HideHelpCommand = true
-	app.SkipFlagParsing = true
+	//app.SkipFlagParsing = true
 	app.Version = appVersion
 	app.Usage = "JDK Version Manager (JVMS) for Windows"
 	app.Metadata = map[string]interface{}{
@@ -28,9 +28,20 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 	}
 
 	app.Action = func(ctx *cli.Context) error {
-		fmt.Println("NewApp")
+		fmt.Printf("LogLevel - loglevel: %d\n", ctx.Int("loglevel"))
+		fmt.Printf("LogLevel - l: %d\n", ctx.Int("l"))
 		printAppUsage(appVersion, buildTime)
 		return nil
+	}
+
+	app.Flags = []cli.Flag{
+		&cli.IntFlag{
+			Name:        "loglevel",
+			Aliases:     []string{"l"},
+			Value:       5,
+			Usage:       "language for the greeting",
+			Destination: &cp.Config.LogLevel,
+		},
 	}
 
 	app.Commands = []*cli.Command{
@@ -218,6 +229,13 @@ func newVersionCommand() *cli.Command {
 }
 
 func printVersion(ctx *cli.Context) error {
+	// logs.Emergency("测试日志级别 1")
+	// logs.Critical("测试日志级别 2")
+	// logs.Error("测试日志级别 3")
+	// logs.Warning("测试日志级别 4")
+	// logs.Notice("测试日志级别 5")
+	// logs.Info("测试日志级别 6")
+	// logs.Debug("测试日志级别 7")
 	fmt.Println(ctx.App.Version)
 	return nil
 }
