@@ -83,7 +83,7 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	err = os.Symlink(filepath.Join(cfx.Store, v), cfx.JavaHome)
 	if err != nil {
-		return errors.New("切换 jdk 失败, " + err.Error())
+		return fmt.Errorf("切换 jdk 失败(%s)，%s", cfx.JavaHome, err.Error())
 	}
 
 	fmt.Println("切换成功。\n当前使用 JDK " + v)

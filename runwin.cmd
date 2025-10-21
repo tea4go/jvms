@@ -66,7 +66,7 @@ echo 当前版本：%app_version%
 
 echo 2 - 运行程序
 echo =============================================================
-del jdkdlindex.json
-echo %app_name% -v
-%app_name% -h
+del jdkdlindex.json   >nul 2>nul
+
+%app_name% rls -t lzu -a
 rem %app_name% rls -t lzu -a

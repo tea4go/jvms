@@ -262,42 +262,42 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	// 根据 webtype 参数选择不同的镜像源
 	switch strings.ToLower(cfx.WebType) {
 	case "tuna":
-		logs.Debug("\n📦 使用镜像源: 清华大学 (Tsinghua University)")
+		logs.Debug("📦 使用镜像源: 清华大学 (Tsinghua University)")
 		WebJDK := jdk.TWebTuna{}
 		WebJDK.BaseURL = "https://mirrors.tuna.tsinghua.edu.cn/Adoptium/"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		logs.Debug("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
 	case "lzu":
-		logs.Debug("\n📦 使用镜像源: 兰州大学 (Lanzhou University)")
+		logs.Debug("📦 使用镜像源: 兰州大学 (Lanzhou University)")
 		WebJDK := jdk.TWebLzu{}
 		WebJDK.BaseURL = "https://mirror4.lzu.edu.cn/openjdk/"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		logs.Debug("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
 	case "injdk":
-		logs.Debug("\n📦 使用镜像源: InJDK 网站")
+		logs.Debug("📦 使用镜像源: InJDK 网站")
 		WebJDK := jdk.TWebInjdk{}
 		WebJDK.BaseURL = "https://d10.injdk.cn/openjdk/openjdk/"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		logs.Debug("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
 	case "azul":
-		logs.Debug("\n📦 使用镜像源: Azul Zulu")
+		logs.Debug("📦 使用镜像源: Azul Zulu")
 		WebJDK := jdk.TWebAzul{}
 		WebJDK.BaseURL = "https://api.azul.com/metadata/v1/zulu/packages"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		logs.Debug("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
 	case "adoptium":
-		logs.Debug("\n📦 使用镜像源: Eclipse Adoptium")
+		logs.Debug("📦 使用镜像源: Eclipse Adoptium")
 		WebJDK := jdk.TWebAdoptium{}
 		WebJDK.BaseURL = "https://api.adoptium.net/v3"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		logs.Debug("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
 	case "huawei":
 	default:
 		// 默认使用huawei镜像源
-		logs.Debug("\n📦 使用镜像源: 华为云 (Huawei Cloud)")
+		logs.Debug("📦 使用镜像源: 华为云 (Huawei Cloud)")
 		WebJDK := jdk.TWebHuawei{}
 		WebJDK.BaseURL = "https://mirrors.huaweicloud.com/openjdk/"
-		logs.Debug("🔗 镜像地址: %s\n\n", WebJDK.BaseURL)
+		logs.Debug("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
 	}
 	// 检查爬取是否出错

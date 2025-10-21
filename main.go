@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 
 	"os"
@@ -31,12 +30,8 @@ var cfx entity.TConfig
 
 // main 是程序的入口函数
 func main() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		flag.PrintDefaults()
-	}
-	logs.SetLevel(5)
 	logs.StartLogger()
+	logs.SetLevel(7)
 
 	// 初始化配置
 	if err := startup(); err != nil {
@@ -91,7 +86,7 @@ func startup() error {
 	cfx.WebAll = false
 
 	// 下载源
-	cfx.WebType = "huawei"
+	cfx.WebType = "lzu"
 
 	// 设置 JDK 存储目录路径
 	cfx.Store = filepath.Join(s, "store")

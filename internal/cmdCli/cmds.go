@@ -43,6 +43,7 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 		newRlsCommand(cp.Config),
 		newProxyCommand(cp.Config),
 		newHelpCommand(),
+		newVersionCommand(),
 	}
 
 	app.CommandNotFound = func(ctx *cli.Context, command string) {
@@ -74,11 +75,8 @@ func printAppUsage(version, buildTime string) {
 	fmt.Println("   remove, rm  删除指定的版本")
 	fmt.Println("   rls         显示可供下载的版本列表")
 	fmt.Println("   proxy       设置下载使用的代理")
-	fmt.Println("   help, h     显示命令列表或命令帮助")
-	fmt.Println("")
-	fmt.Println("全局选项:")
-	fmt.Println("   --help, -h     显示帮助")
-	fmt.Println("   --version, -v  显示版本")
+	fmt.Println("   help, h     显示命令列表或命令帮助，例如：help rls")
+	fmt.Println("   version, v  显示版本号")
 }
 
 func newInitCommand(cfx *entity.TConfig) *cli.Command {
@@ -160,13 +158,15 @@ func newRlsCommand(cfx *entity.TConfig) *cli.Command {
 		Usage: "显示可供下载的版本列表",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:  "all, a",
-				Usage: "列出所有版本",
+				Name:    "all",
+				Aliases: []string{"a"},
+				Usage:   "列出所有版本",
 			},
 			&cli.StringFlag{
-				Name:  "webtype, t",
-				Usage: "设置 OpenJDK 下载源",
-				Value: "huawei",
+				Name:    "webtype",
+				Aliases: []string{"t"},
+				Usage:   "设置 OpenJDK 下载源",
+				Value:   "lzu",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
@@ -198,24 +198,37 @@ func newProxyCommand(cfx *entity.TConfig) *cli.Command {
 func newHelpCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "help",
-		Aliases: []string{"x"},
+		Aliases: []string{"h"},
 		Usage:   "显示命令列表或命令帮助",
 		Action: func(ctx *cli.Context) error {
-			fmt.Println("newHelpCommand")
 			return printHelp(ctx)
 		},
 	}
 }
 
+func newVersionCommand() *cli.Command {
+	return &cli.Command{
+		Name:    "version",
+		Aliases: []string{"v"},
+		Usage:   "显示版本号",
+		Action: func(ctx *cli.Context) error {
+			return printVersion(ctx)
+		},
+	}
+}
+
+func printVersion(ctx *cli.Context) error {
+	fmt.Println(ctx.App.Version)
+	return nil
+}
+
 func printHelp(ctx *cli.Context) error {
-	fmt.Println("printHelp")
 	if !ctx.Args().Present() {
 		buildTime := ""
 		if v, ok := ctx.App.Metadata["build_time"].(string); ok {
 			buildTime = v
 		}
 
-		fmt.Println("printHelp =======================")
 		printAppUsage(ctx.App.Version, buildTime)
 		return nil
 	}

@@ -23,7 +23,7 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 		web.SetProxy(cfx.Proxy)
 	}
 
-	showAll := ctx.Bool("all")
+	showAll := ctx.Bool("a")
 	webType := ctx.String("webtype")
 
 	cfx.WebAll = showAll

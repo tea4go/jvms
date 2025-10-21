@@ -1,0 +1,10 @@
+[
+  {
+    "version": "openjdk-20.0.2",
+    "url": "https://mirror4.lzu.edu.cn/openjdk/20.0.2/openjdk-20.0.2_windows-x64_bin.zip"
+  },
+  {
+    "version": "openjdk-20.0.1",
+    "url": "https://mirror4.lzu.edu.cn/openjdk/20.0.1/openjdk-20.0.1_windows-x64_bin.zip"
+  }
+]
