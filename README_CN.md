@@ -3,7 +3,7 @@
 [![GitHub release](https://img.shields.io/github/release/tea4go/jvms.svg)](https://github.com/tea4go/jvms/releases)
 [![License](https://img.shields.io/github/license/tea4go/jvms.svg)](https://github.com/tea4go/jvms/blob/main/LICENSE)
 
-[英文 en(./README.md)
+[英文 en](./README.md)
 
 > 在 windows/macos/linux 系统上轻松管理多个 JDK 版本
 
