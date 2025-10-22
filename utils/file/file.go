@@ -104,7 +104,7 @@ func Untar(src, dest string) error {
 		case tar.TypeDir:
 			// 创建目录
 			if err := os.MkdirAll(target, 0755); err != nil {
-				return fmt.Errorf("创建目录失败 %s: %w", target, err)
+				return fmt.Errorf("Creating a directory failed (%s), %s", target, err.Error())
 			}
 
 		case tar.TypeReg:

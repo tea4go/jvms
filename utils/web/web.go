@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	logs "github.com/tea4go/gh/log4go"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
@@ -29,11 +30,11 @@ var client = &http.Client{
 //	p - 代理服务器地址，如果为空或 "none" 则不使用代理
 func SetProxy(p string) {
 	if p != "" && p != "none" {
-		fmt.Println("设置代理服务器")
+		logs.Debug("设置代理服务器")
 		proxyUrl, _ := url.Parse(p)
 		client = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
 	} else {
-		fmt.Println("没有代理服务器")
+		logs.Debug("没有代理服务器")
 		client = &http.Client{}
 	}
 }
@@ -51,7 +52,7 @@ func Download(url string, target string) bool {
 	// 创建请求并设置 User-Agent 头，避免 418 错误
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("创建请求时出错", url, "-", err)
+		fmt.Printf("Error creating the request (%s) - %s\n", url, err.Error())
 		return false
 	}
 
@@ -63,18 +64,18 @@ func Download(url string, target string) bool {
 
 	response, err := client.Do(req)
 	if err != nil {
-		fmt.Println("下载时出错", url, "-", err)
+		fmt.Printf("Error while downloading (%s) - %s\n", url, err.Error())
 		return false
 	}
 	if response.StatusCode != 200 {
-		fmt.Println("下载时状态错误", url, "-", response.StatusCode)
+		fmt.Printf("Error status downloading (%s) - %d\n", url, response.StatusCode)
 		return false
 	}
 	defer response.Body.Close()
 
 	output, err := os.Create(target)
 	if err != nil {
-		fmt.Println("创建文件时出错", target, "-", err)
+		fmt.Printf("Error creating the file (%s) - %s\n", target, err)
 		return false
 	}
 	defer output.Close()
@@ -96,7 +97,7 @@ func Download(url string, target string) bool {
 	writer := io.MultiWriter(output, bar)
 	_, err = io.Copy(writer, response.Body)
 	if err != nil {
-		fmt.Println("下载时出错", url, "-", err)
+		fmt.Printf("Error downloading (%s) - %s\n", url, err)
 		return false
 	}
 	bar.Finish()
@@ -117,7 +118,7 @@ func Download(url string, target string) bool {
 //	bool - 下载成功返回 true，失败返回 false
 func GetJDK(download string, v string, url string) (string, bool) {
 	if url == "" {
-		fmt.Printf("JDK版本 %s 的下载无效\n", v)
+		fmt.Printf("%s isn't available right now.\n", v)
 		return "", false
 	}
 
@@ -131,8 +132,9 @@ func GetJDK(download string, v string, url string) (string, bool) {
 	fileName := filepath.Join(download, fmt.Sprintf("%s%s", v, ext))
 	os.Remove(fileName)
 
+	fmt.Printf("Downloading %s...\n", v)
 	if Download(url, fileName) {
-		fmt.Println("下载完成")
+		fmt.Println("Complete")
 		return fileName, true
 	}
 	return "", false
