@@ -1,33 +1,97 @@
 package cmdCli
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"path/filepath"
 
+	"github.com/tucnak/store"
 	"github.com/urfave/cli/v2"
 
 	logs "github.com/tea4go/gh/log4go"
 	"github.com/tea4go/jvms/internal/entity"
+	"github.com/tea4go/jvms/utils/file"
+	"github.com/tea4go/jvms/utils/web"
 )
 
-// TCommandParams 命令参数结构体
-// 包含默认原始路径和配置对象
-type TCommandParams struct {
-	Config *entity.TConfig // 配置对象指针
+// cfx 全局配置对象，存储 JVMS 的运行配置
+var cfx entity.TConfig
+
+// startup 在应用启动前执行
+// 主要功能：
+//  1. 注册 JSON 序列化/反序列化器
+//  2. 加载配置文件 (jvms.json)
+//  3. 初始化存储路径和下载路径
+//  4. 设置代理（如果配置了）
+//
+// 返回:
+//
+//	error - 初始化失败时返回错误
+func startup(c *cli.Context) error {
+	logs.Debug("加载配置 jvms.json 文件")
+	// 注册 JSON 格式的配置存储器
+	store.Register(
+		"json",
+		func(v any) ([]byte, error) {
+			return json.MarshalIndent(v, "", "    ")
+		},
+		json.Unmarshal)
+
+	// 初始化配置存储
+	store.Init("jvms")
+
+	// 加载配置文件
+	if err := store.Load("jvms.json", &cfx); err != nil {
+		return errors.New("加载配置 jvms.json 失败，" + err.Error())
+	}
+
+	// 获取当前可执行文件所在路径
+	s := file.GetCurrentPath()
+
+	// 是否显示所有JDK
+	cfx.WebAll = false
+
+	// 下载源
+	cfx.WebType = "lzu"
+
+	// 设置 JDK 存储目录路径
+	cfx.Store = filepath.Join(s, "store")
+
+	// 设置下载临时目录路径
+	cfx.Download = filepath.Join(s, "download")
+
+	// 如果配置了代理，设置 HTTP 代理
+	if cfx.Proxy != "" {
+		web.SetProxy(cfx.Proxy)
+	}
+
+	return nil
+}
+
+// shutdown 在应用关闭后执行
+// 主要功能：保存配置到 jvms.json 文件
+func shutdown(c *cli.Context) error {
+	if err := store.Save("jvms.json", &cfx); err != nil {
+		return fmt.Errorf("警告: 保存配置失败，%s", err.Error())
+	}
+	return nil
 }
 
 // NewApp 创建 CLI 应用实例
-func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App {
+func NewApp(appName, appVersion, buildTime string) *cli.App {
 	app := cli.NewApp()
 	app.Name = appName
+	app.HideVersion = true
 	app.HideHelp = true
 	app.HideHelpCommand = true
-	//app.SkipFlagParsing = true
 	app.Version = appVersion
-	app.Usage = "JDK Version Manager (JVMS) for Windows"
-	app.Metadata = map[string]interface{}{
+	app.Usage = "JDK Version Manager"
+	app.Metadata = map[string]any{
 		"build_time": buildTime,
 	}
-
+	app.Before = startup
+	app.After = shutdown
 	app.Action = func(ctx *cli.Context) error {
 		printAppUsage(appVersion, buildTime)
 		return nil
@@ -50,14 +114,14 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 	}
 
 	app.Commands = []*cli.Command{
-		newInitCommand(cp.Config),
-		newListCommand(cp.Config),
-		newInstallCommand(cp.Config),
-		newSwitchCommand(cp.Config),
-		newUseCommand(cp.Config),
-		newRemoveCommand(cp.Config),
-		newRlsCommand(cp.Config),
-		newProxyCommand(cp.Config),
+		newInitCommand(&cfx),
+		newListCommand(&cfx),
+		newInstallCommand(&cfx),
+		newSwitchCommand(&cfx),
+		newUseCommand(&cfx),
+		newRemoveCommand(&cfx),
+		newRlsCommand(&cfx),
+		newProxyCommand(&cfx),
 		newHelpCommand(),
 		newVersionCommand(),
 	}
@@ -71,10 +135,10 @@ func NewApp(appName, appVersion, buildTime string, cp *TCommandParams) *cli.App 
 
 func printAppUsage(version, buildTime string) {
 	fmt.Println("NAME:")
-	fmt.Println("   jvms - JDK Version Manager (JVMS) for Windows")
+	fmt.Println("   jvms - JDK Version Manager (JVMS)")
 	fmt.Println("")
 	fmt.Println("USAGE:")
-	fmt.Println("   jvms [全局选项] 命令 [命令选项] [参数...]")
+	fmt.Println("   jvms [Global options] command [command options] [arguments...]")
 	fmt.Println("")
 	if buildTime != "" {
 		fmt.Printf("VERSION:\n   %s - %s\n", version, buildTime)
@@ -83,19 +147,18 @@ func printAppUsage(version, buildTime string) {
 	}
 	fmt.Println("")
 	fmt.Println("COMMANDS:")
-	fmt.Println("   init        初始化配置文件")
-	fmt.Println("   list, ls    列出当前已安装的JDK")
-	fmt.Println("   install, i  安装可用的远程JDK")
-	fmt.Println("   switch, s   切换使用指定的版本或索引号")
-	fmt.Println("   use, u      切换使用指定的版本或索引号")
-	fmt.Println("   remove, rm  删除指定的版本")
-	fmt.Println("   rls         显示可供下载的版本列表")
-	fmt.Println("   proxy       设置下载使用的代理")
-	fmt.Println("   help, h     显示命令列表或命令帮助，例如：help rls")
-	fmt.Println("   version, v  显示版本号")
+	fmt.Println("   init        Initialize the configuration file")
+	fmt.Println("   list, ls    List installed versions")
+	fmt.Println("   install, i  Download and install a version")
+	fmt.Println("   use, u      Switch to specified version")
+	fmt.Println("   remove, rm  Uninstall a version")
+	fmt.Println("   rls         List remote versions available for install")
+	fmt.Println("   proxy       Set a proxy to use for downloads.")
+	fmt.Println("   help, h     Shows a list of commands or help for one command，eg: help rls")
+	fmt.Println("   version, v  Show version")
 	fmt.Println("")
-	fmt.Println("OPTIONS:")
-	fmt.Println("   --loglevel,-l 日志级别")
+	fmt.Println("GLOBAL OPTIONS:")
+	fmt.Println("   --loglevel,-l set log level (1~7)")
 }
 
 func newInitCommand(cfx *entity.TConfig) *cli.Command {

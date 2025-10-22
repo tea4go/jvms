@@ -31,6 +31,7 @@ taskkill /f /im link.exe       >nul 2>nul
 taskkill /f /im git.exe        >nul 2>nul
 
 :: 编译程序
+SET log_level=5
 SET GO111MODULE=on
 SET CGO_ENABLED=0
 SET GOOS=windows
