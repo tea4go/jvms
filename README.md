@@ -3,6 +3,8 @@
 [![GitHub release](https://img.shields.io/github/release/tea4go/jvms.svg)](https://github.com/tea4go/jvms/releases)
 [![License](https://img.shields.io/github/license/tea4go/jvms.svg)](https://github.com/tea4go/jvms/blob/main/LICENSE)
 
+[简体中文 🇨🇳](./README_CN.md)
+
 > Manage multiple JDK versions easily on Windows/macOS/Linux.
 
 [JVMS](https://github.com/tea4go/jvms) is a JDK version manager designed for Windows, macOS, and Linux, making it simple to install and switch between multiple JDK versions on the same machine.
