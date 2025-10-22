@@ -428,7 +428,7 @@ func setJavaHome(javaHome string) error {
 	case "darwin", "linux":
 		return setJavaHomeUnix(javaHome)
 	default:
-		return fmt.Errorf("不支持的操作系统 (%s)", runtime.GOOS)
+		return fmt.Errorf("unsupported operating systems (%s)", runtime.GOOS)
 	}
 }
 
@@ -439,9 +439,9 @@ func setJavaHomeWindows(javaHome string) error {
 	cmd := exec.Command("cmd", "/C", "setx", "JAVA_HOME", javaHome, "/M")
 	err := cmd.Run()
 	if err != nil {
-		return errors.New("设置环境变量 JAVA_HOME 失败，请以管理员身份运行")
+		return errors.New("setting environment variable JAVA_HOME failed, run as administrator")
 	}
-	fmt.Println("设置 JAVA_HOME 环境变量为 ", javaHome)
+	logs.Debug("设置 JAVA_HOME 环境变量为 ", javaHome)
 
 	// 设置 PATH
 	javaBinPath := filepath.Join(javaHome, "bin")
@@ -459,9 +459,9 @@ func setJavaHomeWindows(javaHome string) error {
 	cmd = exec.Command("cmd", "/C", "setx", "path", newPath, "/m")
 	err = cmd.Run()
 	if err != nil {
-		return errors.New("设置环境变量 `PATH` 失败: 请以管理员身份运行")
+		return errors.New("setting environment variable JAVA_HOME failed, run as administrator")
 	}
-	fmt.Println("添加 jvms.exe 到 `path` 环境变量")
+	fmt.Println("Add jvms.exe to the 'path' environment variable")
 	return nil
 }
 
@@ -504,7 +504,7 @@ func setJavaHomeUnix(javaHome string) error {
 		// 读取现有配置
 		data, err := os.ReadFile(configFile)
 		if err != nil {
-			fmt.Printf("⚠️ 警告: 读取 %s 失败，%v\n", configFile, err)
+			logs.Warning("⚠️ 警告: 读取 %s 失败，%v", configFile, err)
 			continue
 		}
 		content := string(data)
@@ -538,7 +538,7 @@ func setJavaHomeUnix(javaHome string) error {
 		// 写回配置文件
 		err = os.WriteFile(configFile, []byte(newContent), 0644)
 		if err != nil {
-			fmt.Printf("⚠️ 警告: 写入 %s 失败，%v\n", configFile, err)
+			logs.Warning("⚠️ 警告: 写入 %s 失败，%v", configFile, err)
 			continue
 		}
 
@@ -554,9 +554,9 @@ func setJavaHomeUnix(javaHome string) error {
 		return fmt.Errorf("未找到任何配置文件 (.zshrc, .bashrc, .bash_profile)")
 	}
 
-	fmt.Println("✓ 已更新以下配置文件:")
+	logs.Debug("✓ 已更新以下配置文件:")
 	for k, f := range updatedFiles {
-		fmt.Printf("%d - %s\n", k, f)
+		logs.Debug("%d - %s", k, f)
 	}
 
 	// 检测当前使用的 shell 并给出提示
@@ -578,7 +578,7 @@ func setJavaHomeUnix(javaHome string) error {
 		sourceFile = updatedFiles[0] // 使用第一个更新的文件
 	}
 
-	fmt.Printf("\n💡 提示: 运行以下命令使配置立即生效:\n")
+	fmt.Printf("💡 The run command takes effect:\n")
 	fmt.Printf("   source %s\n", sourceFile)
 
 	return nil
