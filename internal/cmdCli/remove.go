@@ -29,21 +29,21 @@ func removeCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	v := ctx.Args().First()
 
 	if jdk.IsVersionInstalled(cfx.Store, v) {
-		fmt.Printf("删除 %s ...\n", v)
+		fmt.Printf("Remove %s ...\n", v)
 		if cfx.CurrentJDKVersion == v {
 			os.Remove(cfx.JavaHome)
 		}
 		dir := filepath.Join(cfx.Store, v)
 		e := os.RemoveAll(dir)
 		if e != nil {
-			fmt.Println("删除 " + v + " 时出错")
-			fmt.Println("请手动删除 " + dir)
+			fmt.Println("Error removing " + v)
+			fmt.Println("Manually remove " + dir)
 		} else {
-			fmt.Printf("删除完成")
+			fmt.Println("done")
 		}
 	} else {
-		fmt.Println(v + " 未安装")
-		fmt.Println("输入 jvms list 查看已安装的版本。")
+		fmt.Println(v + " is not installed. ")
+		fmt.Println("Use 'jvms list' to see installed versions.")
 	}
 	return nil
 }

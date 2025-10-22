@@ -30,13 +30,13 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	}
 
 	if ctx.NArg() == 0 {
-		return errors.New("无效的版本，输入 git jvms rls 查看可供安装的版本")
+		return errors.New("invalid version, Type 'jvms rls' to see what is available for install")
 	}
 
 	v := ctx.Args().First()
 
 	if jdk.IsVersionInstalled(cfx.Store, v) {
-		fmt.Println("版本 " + v + " 已经安装。")
+		fmt.Println(v + " is already installed.")
 		return nil
 	}
 
@@ -54,10 +54,10 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	for _, version := range versions {
 		if version.Version == v {
-			fmt.Printf("正在下载 %s - %s\n", v, version.Url)
+			logs.Debug("正在下载 %s - %s", v, version.Url)
 			dlzipfile, success := web.GetJDK(cfx.Download, v, version.Url)
 			if success {
-				fmt.Printf("正在安装 %s ...\n", v)
+				fmt.Printf("Installing %s ...\n", v)
 
 				// 解压 JDK 到临时目录
 				jdktempfile := filepath.Join(cfx.Download, fmt.Sprintf("%s_temp", v))
@@ -70,7 +70,7 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 				}
 				err := file.Extract(dlzipfile, jdktempfile)
 				if err != nil {
-					return fmt.Errorf("解压失败，%s", err.Error())
+					return fmt.Errorf("unzip failed, %s", err.Error())
 				}
 
 				// 复制 JDK 文件到安装目录
@@ -91,17 +91,17 @@ func installCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 				// 可以考虑保留临时文件
 				err = os.RemoveAll(jdktempfile)
 				if err != nil {
-					fmt.Printf("警告: 清理临时目录失败，%v\n", err)
+					logs.Warning("警告: 清理临时目录失败，%v", err)
 				}
 
-				fmt.Println("安装成功完成。")
-				fmt.Printf("如果您想使用此版本，请执行 jvms switch %v\n", v)
+				fmt.Println("Installation completedly succesfully.")
+				fmt.Printf("Use: jvms use %v, if you'd like to use this version\n", v)
 			} else {
-				return fmt.Errorf("无法下载 %s 版本", v)
+				return fmt.Errorf("the %s cannot be downloaded", v)
 			}
 			return nil
 		}
 	}
 
-	return errors.New("无效的版本，输入 jvms rls 查看可供安装的版本")
+	return errors.New("invalid version, Type 'jvms rls' to see what is available for install")
 }

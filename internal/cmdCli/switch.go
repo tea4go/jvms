@@ -56,19 +56,19 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 		// 输入是有效的数字，获取已安装的JDK列表
 		installedJDKs := jdk.GetInstalled(cfx.Store)
 		if len(installedJDKs) == 0 {
-			return errors.New("没有可用的JDK版本")
+			return errors.New("no JDK installations found")
 		}
 
 		if index > len(installedJDKs) {
-			return fmt.Errorf("无效的索引 %d，应该为(1~%d)", index, len(installedJDKs))
+			return fmt.Errorf("invalid index %d,should be between 1 and %d", index, len(installedJDKs))
 		}
 
 		v = installedJDKs[index-1]
-		fmt.Printf("选择 %d - %s\n", index, v)
+		fmt.Printf("Using index %d to select %s\n", index, v)
 	}
 
 	if !jdk.IsVersionInstalled(cfx.Store, v) {
-		fmt.Printf("未安装JDK版本为 %s\n", v)
+		fmt.Printf("%s is not installed.\n", v)
 		return nil
 	}
 
@@ -76,7 +76,7 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 	if file.Exists(cfx.JavaHome) {
 		err := os.Remove(cfx.JavaHome)
 		if err != nil {
-			return errors.New("切换 JDK版本 失败，请手动删除 " + cfx.JavaHome)
+			return errors.New("switch jdk failed, please manually remove " + cfx.JavaHome)
 		}
 	}
 
@@ -87,10 +87,10 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	err = os.Symlink(filepath.Join(cfx.Store, v), cfx.JavaHome)
 	if err != nil {
-		return fmt.Errorf("切换 jdk 失败(%s)，%s", cfx.JavaHome, err.Error())
+		return fmt.Errorf("switch jdk failed (%s), %s", cfx.JavaHome, err.Error())
 	}
 
-	fmt.Println("切换成功。\n当前使用 " + v)
+	fmt.Println("Switch success.\nNow using " + v)
 	cfx.CurrentJDKVersion = v
 	return nil
 }

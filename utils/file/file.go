@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	logs "github.com/tea4go/gh/log4go"
 )
 
 // Unzip 解压缩 zip 文件到指定目录
@@ -68,13 +70,13 @@ func Unzip(src, dest string) error {
 func Untar(src, dest string) error {
 	file, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("打开文件失败: %w", err)
+		return err
 	}
 	defer file.Close()
 
 	gzr, err := gzip.NewReader(file)
 	if err != nil {
-		return fmt.Errorf("创建 gzip reader 失败: %w", err)
+		return err
 	}
 	defer gzr.Close()
 
@@ -83,11 +85,11 @@ func Untar(src, dest string) error {
 	for {
 		header, err := tr.Next()
 		if err == io.EOF {
-			fmt.Printf("解压完成\n")
+			fmt.Printf("The decompression is complete\n")
 			break // 读取完成
 		}
 		if err != nil {
-			return fmt.Errorf("读取 tar header 失败: %w", err)
+			return fmt.Errorf("failed to read tar header, %s", err.Error())
 		}
 
 		target := filepath.Join(dest, header.Name)
@@ -96,7 +98,7 @@ func Untar(src, dest string) error {
 		cleanDest := filepath.Clean(dest) + string(os.PathSeparator)
 		cleanTarget := filepath.Clean(target)
 		if !strings.HasPrefix(cleanTarget, cleanDest) && cleanTarget != filepath.Clean(dest) {
-			fmt.Printf("警告: 跳过非法路径: %s\n", header.Name)
+			logs.Warning("警告: 跳过非法路径: %s", header.Name)
 			continue
 		}
 
@@ -104,50 +106,51 @@ func Untar(src, dest string) error {
 		case tar.TypeDir:
 			// 创建目录
 			if err := os.MkdirAll(target, 0755); err != nil {
-				return fmt.Errorf("Creating a directory failed (%s), %s", target, err.Error())
+				return fmt.Errorf("creating a directory failed (%s), %s", target, err.Error())
 			}
 
 		case tar.TypeReg:
 			// 创建文件
 			if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
-				return fmt.Errorf("创建父目录失败 %s: %w", filepath.Dir(target), err)
+				return fmt.Errorf("creating a directory failed (%s), %s", filepath.Dir(target), err.Error())
 			}
 
 			outFile, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR|os.O_TRUNC, os.FileMode(header.Mode))
 			if err != nil {
-				return fmt.Errorf("创建文件失败 %s: %w", target, err)
+				return fmt.Errorf("creating a file failed (%s), %s", target, err.Error())
+
 			}
 
 			written, err := io.Copy(outFile, tr)
 			outFile.Close()
 
 			if err != nil {
-				return fmt.Errorf("写入文件失败 %s: %w", target, err)
+				return fmt.Errorf("write a file failed (%s), %s", target, err.Error())
 			}
 
 			if written != header.Size {
-				return fmt.Errorf("文件大小不匹配 %s: 期望 %d, 实际 %d", target, header.Size, written)
+				return fmt.Errorf("file size mismatch (%s), Expect %d, Actual %d", target, header.Size, written)
 			}
 
 		case tar.TypeSymlink:
 			// 创建符号链接
 			if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
-				return fmt.Errorf("创建符号链接父目录失败 %s: %w", filepath.Dir(target), err)
+				return fmt.Errorf("failed to create a symlink parent directory (%s), %s", filepath.Dir(target), err.Error())
 			}
 
 			// 如果符号链接已存在，先删除
 			if _, err := os.Lstat(target); err == nil {
 				if err := os.Remove(target); err != nil {
-					return fmt.Errorf("删除已存在的符号链接失败 %s: %w", target, err)
+					return fmt.Errorf("failed to delete an existing symlink (%s), %s", target, err.Error())
 				}
 			}
 
 			if err := os.Symlink(header.Linkname, target); err != nil {
-				fmt.Printf("警告: 创建符号链接失败 %s -> %s: %v\n", target, header.Linkname, err)
+				logs.Warning("警告: 创建符号链接失败 (%s -> %s)，%v", target, header.Linkname, err)
 			}
 
 		default:
-			fmt.Printf("警告: 跳过不支持的文件类型 %c: %s\n", header.Typeflag, header.Name)
+			logs.Warning("警告: 跳过不支持的文件类型 %c - %s", header.Typeflag, header.Name)
 		}
 	}
 

@@ -37,13 +37,13 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	for i, version := range versions {
 		fmt.Printf("%3d) %s\n", i+1, version.Version)
 		if !showAll && i >= 9 {
-			fmt.Println("\n使用 jvm rls -a 显示所有版本")
+			fmt.Println("Use 'jvm rls -a' to show all versions")
 			break
 		}
 	}
 
 	if len(versions) == 0 {
-		fmt.Println("没有可供下载的 jdk 版本。")
+		fmt.Println("No availabled jdk veriosn for download.")
 	}
 
 	return nil

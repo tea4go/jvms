@@ -19,7 +19,7 @@ import (
 //
 //	error - 执行错误
 func listCmd(ctx *cli.Context, cfx *entity.TConfig) error {
-	fmt.Println("已安装的JDK列表 (标记 * 为正在使用)")
+	fmt.Println("Installed JDK (* marks in use)")
 	v := jdk.GetInstalled(cfx.Store)
 	for i, version := range v {
 		if cfx.CurrentJDKVersion == version {
@@ -29,7 +29,7 @@ func listCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 		}
 	}
 	if len(v) == 0 {
-		fmt.Println("未识别到已安装的版本。")
+		fmt.Println("No installations recognized.")
 	}
 	return nil
 }

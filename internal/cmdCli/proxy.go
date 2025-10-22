@@ -19,13 +19,12 @@ import (
 //	error - 执行错误
 func proxyCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	if ctx.Bool("show") {
-		fmt.Printf("当前代理: %s\n", cfx.Proxy)
+		fmt.Printf("Current proxy: %s\n", cfx.Proxy)
 		return nil
 	}
 
 	if ctx.IsSet("set") {
 		cfx.Proxy = ctx.String("set")
-		fmt.Printf("代理已设置为: %s\n", cfx.Proxy)
 	}
 
 	return nil

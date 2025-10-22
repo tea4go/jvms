@@ -44,7 +44,7 @@ func getJavaHome(jdkTempFile string) string {
 
 		// 查找 javac 文件
 		if filepath.Base(path) == javacName {
-			fmt.Printf("找到 javac 所在目录 - %s\n", path)
+			logs.Debug("找到 javac 所在目录 - %s", path)
 
 			// 获取 bin 目录的父目录（即 JAVA_HOME）
 			absPath := filepath.Join(jdkTempFile, path)
@@ -53,7 +53,7 @@ func getJavaHome(jdkTempFile string) string {
 			binDir := filepath.Dir(absPath)
 			if filepath.Base(binDir) == "bin" {
 				javaHome = filepath.Dir(binDir)
-				fmt.Printf("确定 JAVA_HOME = %s\n", javaHome)
+				logs.Debug("确定 JAVA_HOME = %s\n", javaHome)
 				return fs.SkipAll
 			}
 		}
@@ -247,11 +247,11 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		versions, err := loadCachedVersions(cacheFile)
 		if err == nil && len(versions) > 0 {
 			// 本地缓存文件存在，且有数据，则用缓存数据
-			fmt.Println("从本地缓存加载版本列表...")
+			fmt.Println("Load the version list from the local cache ...")
 			return versions, nil
 		}
 		// 如果加载失败，继续从网络获取
-		fmt.Println("缓存文件加载失败，从网络获取...")
+		fmt.Println("Cache file fails to load and is retrieved from the network ...")
 	}
 
 	var versions []entity.TJDKVersion
@@ -362,10 +362,10 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 
 	// 保存到缓存
 	if err := saveCachedVersions(cacheFile, versions); err != nil {
-		fmt.Printf("警告: 保存缓存失败: %v\n", err)
+		logs.Warning("警告: 保存缓存失败，%v", err.Error())
 		// 不返回错误，因为主要功能已经完成
 	} else {
-		fmt.Println("版本列表已缓存到本地 -", cacheFile)
+		logs.Debug("版本列表已缓存到本地 -", cacheFile)
 	}
 
 	return versions, nil
