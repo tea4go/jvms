@@ -1,20 +1,23 @@
-# JVMS - Windows JDK 版本管理器
+# JVMS - 全平台 JDK 版本管理器
 
 [![GitHub release](https://img.shields.io/github/release/tea4go/jvms.svg)](https://github.com/tea4go/jvms/releases)
 [![License](https://img.shields.io/github/license/tea4go/jvms.svg)](https://github.com/tea4go/jvms/blob/main/LICENSE)
 
-> 在 Windows 系统上轻松管理多个 JDK 版本
+> 在 windows/macos/linux 系统上轻松管理多个 JDK 版本
 
-[JVMS](https://github.com/tea4go/jvms) 是一个专为 Windows 设计的 JDK 版本管理工具，让您可以在同一台计算机上安装和切换多个 JDK 版本。
+[JVMS](https://github.com/tea4go/jvms) 是一个专为 windows/macos/linux 设计的 JDK 版本管理工具，让您可以在同一台计算机上安装和切换多个 JDK 版本。
 
 ## 特性
 
 - ✅ **多版本管理** - 在一台机器上安装和管理多个 JDK 版本
 - 🔄 **快速切换** - 无需重启，即时切换 JDK 版本
 - 📦 **多源支持** - 支持从多个镜像源下载 JDK
-  - Adoptium (Eclipse Temurin) (移除，国内速度太慢)
-  - Azul Zulu (移除，国内速度太慢)
-  - 华为云 OpenJDK 镜像（新增，下载速度从50+KB，提升到了6+MB，在同一条宽带，速度提升100倍）
+  - 清华大学软件镜像库
+  - 兰州大学软件镜像库
+  - injdk
+  - Adoptium (Eclipse Temurin)
+  - Azul Zulu
+  - 华为云 OpenJDK 镜像
 - 🎯 **智能匹配** - 自动识别系统架构，下载适配版本
 - 🚀 **零依赖** - 使用 Go 编写，无需预装 JDK
 - 🔗 **符号链接** - 使用符号链接技术，切换后所有终端立即生效
@@ -64,7 +67,7 @@ JVMS 让这一切变得简单！
 
 ```
 NAME:
-   jvms - Windows JDK 版本管理器
+   jvms - 全平台 JDK 版本管理器
 
 USAGE:
    jvms.exe [全局选项] 命令 [命令选项] [参数...]
@@ -330,10 +333,6 @@ A: Windows 创建符号链接需要管理员权限。只在 `jvms init` 和 `jvm
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启 Pull Request
-
-### 相关文档
-
-- [华为云镜像解析工具文档](utils/jdk/huawei.md) - 详细了解 JDK 镜像解析功能
 
 ### 更新日志
 
