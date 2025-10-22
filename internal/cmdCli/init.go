@@ -3,6 +3,7 @@ package cmdCli
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/tea4go/jvms/internal/entity"
 	"github.com/urfave/cli/v2"
@@ -33,6 +34,13 @@ func initCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	return setJavaHome(cfx.JavaHome)
 }
 
+// jdk缺省目录：
+// windows: C:\Program Files\jdk
+// linux/mac: /用户目录/jdk
 func defaultJavaHome() string {
-	return filepath.Join(os.Getenv("ProgramFiles"), "jdk")
+	if runtime.GOOS == "windows" {
+		return filepath.Join(os.Getenv("ProgramFiles"), "jdk")
+	}
+	homeDir, _ := os.UserHomeDir()
+	return filepath.Join(homeDir, "jdk")
 }
