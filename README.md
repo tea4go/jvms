@@ -1,111 +1,111 @@
-# JVMS - 全平台 JDK 版本管理器
+# JVMS - Cross-Platform JDK Version Manager
 
 [![GitHub release](https://img.shields.io/github/release/tea4go/jvms.svg)](https://github.com/tea4go/jvms/releases)
 [![License](https://img.shields.io/github/license/tea4go/jvms.svg)](https://github.com/tea4go/jvms/blob/main/LICENSE)
 
-> 在 windows/macos/linux 系统上轻松管理多个 JDK 版本
+> Manage multiple JDK versions easily on Windows/macOS/Linux.
 
-[JVMS](https://github.com/tea4go/jvms) 是一个专为 windows/macos/linux 设计的 JDK 版本管理工具，让您可以在同一台计算机上安装和切换多个 JDK 版本。
+[JVMS](https://github.com/tea4go/jvms) is a JDK version manager designed for Windows, macOS, and Linux, making it simple to install and switch between multiple JDK versions on the same machine.
 
-## 特性
+## Features
 
-- ✅ **多版本管理** - 在一台机器上安装和管理多个 JDK 版本
-- 🔄 **快速切换** - 无需重启，即时切换 JDK 版本
-- 📦 **多源支持** - 支持从多个镜像源下载 JDK
-  - 清华大学软件镜像库
-  - 兰州大学软件镜像库
+- ✅ **Multi-version management** - Install and manage multiple JDK versions on one machine
+- 🔄 **Fast switching** - Switch JDK versions instantly without rebooting
+- 📦 **Multi-source support** - Download JDK builds from multiple mirrors
+  - Tsinghua University Open Source Software Mirror
+  - Lanzhou University Mirror
   - injdk
   - Adoptium (Eclipse Temurin)
   - Azul Zulu
-  - 华为云 OpenJDK 镜像
-- 🎯 **智能匹配** - 自动识别系统架构，下载适配版本
-- 🚀 **零依赖** - 使用 Go 编写，无需预装 JDK
-- 🔗 **符号链接** - 使用符号链接技术，切换后所有终端立即生效
-- 🏠 **本地版本** - 支持添加本地 JDK 版本
-- 🌐 **自定义源** - 支持配置私有下载服务器
+  - Huawei Cloud OpenJDK Mirror
+- 🎯 **Smart detection** - Identify your system architecture and download the matching build automatically
+- 🚀 **Zero dependencies** - Written in Go, no JDK required beforehand
+- 🔗 **Symbolic links** - Use symlinks so every terminal picks up the change immediately
+- 🏠 **Local versions** - Add locally downloaded JDK archives
+- 🌐 **Custom sources** - Configure private download servers
 
-## 为什么需要 JVMS？
+## Why JVMS?
 
-在开发过程中，您可能需要：
-- 用不同 JDK 版本测试项目兼容性
-- 某些项目需要特定 JDK 版本
-- 体验最新的 JDK 特性而不影响稳定版本
-- 在旧版本和新版本之间快速切换
+During development you may need to:
+- Test project compatibility across different JDK versions
+- Run projects that require a specific JDK
+- Try new JDK features without disturbing your stable setup
+- Switch quickly between legacy and cutting-edge versions
 
-JVMS 让这一切变得简单！
+JVMS makes it all effortless!
 
-## 安装
+## Installation
 
-### 快速安装
+### Quick install
 
-1. **下载最新版本**
-   - 访问 [Releases 页面](https://github.com/tea4go/jvms/releases)
-   - 下载最新的 `jvms.zip`
+1. **Download the latest release**
+   - Visit the [Releases page](https://github.com/tea4go/jvms/releases)
+   - Download the newest `jvms.zip`
 
-2. **解压并配置**
+2. **Extract and configure**
    ```cmd
-   # 解压 zip 文件到你想要的位置，例如：C:\jvms
-   # 注意：建议选择一个固定的位置，避免频繁移动
+   # Extract the zip file to your preferred location, for example: C:\jvms
+   # Tip: choose a stable location and avoid moving it frequently
    ```
 
-3. **初始化 JVMS**
+3. **Initialize JVMS**
    ```cmd
-   # 以管理员身份运行
+   # Run as administrator
    cd C:\jvms
    jvms.exe init
    ```
 
-4. **完成！**
+4. **Done!**
 
-   初始化完成后，JVMS 会自动配置环境变量。重新打开终端即可使用。
+   After initialization, JVMS configures the environment variables automatically. Reopen your terminal to start using it.
 
-![安装示例](images/下载jdk.jpg)
+![Installation example](images/下载jdk.jpg)
 
-## 使用指南
+## Usage Guide
 
-### 命令概览
+### Command overview
 
 ```
 NAME:
-   jvms - 全平台 JDK 版本管理器
+   jvms - Cross-platform JDK version manager
 
 USAGE:
-   jvms.exe [全局选项] 命令 [命令选项] [参数...]
+   jvms.exe [global options] command [command options] [arguments...]
 
 VERSION:
    2.0.0
 
 COMMANDS:
-     init        初始化配置文件
-     list, ls    列出已安装的 JDK 版本
-     install, i  安装远程可用的 JDK 版本
-     switch, s   切换到指定的 JDK 版本
-     use, u      临时使用指定的 JDK 版本（当前会话）
-     remove, rm  删除指定的 JDK 版本
-     rls         显示可供下载的 JDK 版本列表
-     proxy       设置下载代理
-     help, h     显示命令列表或命令帮助
+     init        Initialize configuration files
+     list, ls    List installed JDK versions
+     install, i  Install a remote JDK version
+     switch, s   Switch to a specific JDK version
+     use, u      Temporarily use a version for the current session
+     remove, rm  Remove a JDK version
+     rls         Show available JDK versions
+     proxy       Configure a download proxy
+     help, h     Show command list or help for a command
 
-全局选项:
-   --help, -h     显示帮助
-   --version, -v  显示版本号
+GLOBAL OPTIONS:
+   --help, -h     Show help
+   --version, -v  Print version information
 ```
 
-### 基本使用流程
+### Basic workflow
 
-#### 1. 查看可下载的 JDK 版本
+#### 1. Browse downloadable JDK versions
 
 ```cmd
-# 查看前 10 个可用版本
+# Show the first 10 available versions
 jvms rls
 
-# 查看所有可用版本
+# Show all available versions
 jvms rls -a
 ```
 
-输出示例：
+Output example:
 ```
-从本地缓存加载版本列表...
+Loading version list from local cache...
   1) openjdk-25
   2) openjdk-24.0.2
   3) openjdk-23.0.2
@@ -117,66 +117,66 @@ jvms rls -a
   9) openjdk-17.0.2
  10) openjdk-16.0.2
 
-使用 "jvm rls -a" 显示所有版本
+Use "jvm rls -a" to display all versions
 ```
 
-#### 2. 安装 JDK
+#### 2. Install a JDK
 
 ```cmd
-# 以管理员身份运行
+# Run as administrator
 $ jvms install 17.0.6
 
-# 或安装指定的版本
+# Or install a named version
 $ jvms install openjdk-21
-从本地缓存加载版本列表...
-正在下载 JDK 版本 openjdk-21.0.2...
+Loading version list from local cache...
+Downloading JDK version openjdk-21.0.2...
  201.33 MB / 201.33 MB [=================================] 100.00% 6.19 MB/s 32s
-完成
-正在安装 JDK openjdk-21.0.2 ...
-安装成功完成。如果您想使用此版本，请使用: jvms switch openjdk-21.0.2
+Done
+Installing JDK openjdk-21.0.2 ...
+Installation finished successfully. To use this version, run: jvms switch openjdk-21.0.2
 ```
-> 下载速度从50+KB，提升到了6+MB（在同一条宽带，速度提升100倍）
+> Download speed jumped from 50+ KB/s to 6+ MB/s (same broadband, 100x faster)
 
-#### 3. 查看已安装的版本
+#### 3. Check installed versions
 
 ```cmd
 jvms list
-# 或简写
+# or shorthand
 jvms ls
 ```
 
-#### 4. 切换 JDK 版本
+#### 4. Switch JDK versions
 
 ```cmd
-# 全局切换（所有新终端生效）
+# Global switch (affects all new terminals)
 jvms switch 17.0.6
 
-# 或使用 use 命令临时切换（仅当前会话）
+# Temporarily switch for the current session
 jvms use 21.0.4
 ```
 
-#### 5. 验证切换结果
+#### 5. Verify the switch
 
 ```cmd
 java -version
 ```
 
-![使用示例](images/安装jdk.jpg)
+![Usage example](images/安装jdk.jpg)
 
-### 高级功能
+### Advanced features
 
-#### 添加本地 JDK 版本
+#### Add a local JDK version
 
-如果你已经下载了 JDK，可以手动添加到 JVMS：
+If you already have a JDK, you can add it manually:
 
-1. 找到 JVMS 的安装目录（例如：`C:\jvms`）
-2. 进入 `store` 子目录
-3. 将 JDK 文件夹复制到 `store` 目录
-4. 重命名为版本号（例如：`17.0.1`）
-5. 运行 `jvms list` 确认
-6. 运行 `jvms switch 17.0.1` 切换版本
+1. Locate the JVMS installation directory (for example: `C:\jvms`)
+2. Enter the `store` subdirectory
+3. Copy the JDK folder into `store`
+4. Rename it to the version number (for example: `17.0.1`)
+5. Run `jvms list` to confirm
+6. Run `jvms switch 17.0.1` to switch versions
 
-**目录结构示例：**
+**Directory structure example:**
 ```
 C:\jvms\
   ├── jvms.exe
@@ -192,23 +192,23 @@ C:\jvms\
           └── ...
 ```
 
-![JDK目录示例](images/安装目录.jpg)
+![JDK directory example](images/安装目录.jpg)
 
-#### 配置下载代理
+#### Configure a download proxy
 
-如果需要通过代理下载：
+If you need to download through a proxy:
 
 ```cmd
 jvms proxy http://proxy.example.com:8080
 ```
 
-#### 搭建私有 JDK 下载服务器
+#### Set up a private JDK download server
 
-适用于企业内网环境或需要自定义 JDK 版本的场景。
+Ideal for corporate intranets or customized JDK builds.
 
-**1. 创建索引文件**
+**1. Create an index file**
 
-创建 `index.json` 文件：
+Create an `index.json` file:
 
 ```json
 [
@@ -223,140 +223,140 @@ jvms proxy http://proxy.example.com:8080
 ]
 ```
 
-**2. 部署到 HTTP 服务器**
+**2. Deploy to an HTTP server**
 
-将 `jdkdlindex.json` 和 JDK zip 文件部署到 Nginx、Apache 或任何静态文件服务器。
+Place `jdkdlindex.json` and the JDK zip files on Nginx, Apache, or any static file server.
 
-**3. 配置 JVMS**
+**3. Configure JVMS**
 
 ```cmd
 jvms init
 ```
 
-可选：自定义 JAVA_HOME 路径
+Optional: customize the JAVA_HOME path
 ```cmd
 jvms init --java_home D:\MyJDK
 ```
 
-**4. 使用私有源**
+**4. Use the private source**
 
 ```cmd
-jvms rls                      # 列出私有源中的 JDK 版本
-jvms install 17.0.10-custom   # 安装私有源中的版本
+jvms rls                      # List JDK versions provided by the private source
+jvms install 17.0.10-custom   # Install a version from the private source
 ```
 
-**制作 JDK zip 包：**
-1. 打开 JDK 安装目录（包含 `bin`、`lib` 等文件夹）
-2. 选中所有文件和文件夹
-3. 压缩为 `.zip` 格式（注意：不要包含外层文件夹）
-4. 上传到你的服务器
-5. 在 `index.json` 中添加对应的链接
+**Create a JDK zip package:**
+1. Open the JDK installation directory (contains `bin`, `lib`, etc.)
+2. Select all files and folders
+3. Compress them into a `.zip` archive (do not include the outer folder)
+4. Upload the archive to your server
+5. Add the corresponding link in `index.json`
 
-## 工作原理
+## How It Works
 
-### 为什么选择符号链接？
+### Why symbolic links?
 
-管理多个 JDK 版本通常有两种方式：
+Managing multiple JDK versions usually comes down to two approaches:
 
-1. **修改 PATH 环境变量** - 每次切换都修改系统 PATH，或使用批处理文件重定向
-   - ❌ 需要重启终端才能生效
-   - ❌ 实现复杂，容易出问题
+1. **Modify the PATH environment variable** - Update PATH each time you switch or rely on batch scripts
+   - ❌ Requires restarting the terminal to take effect
+   - ❌ Complex to implement and error-prone
 
-2. **使用符号链接（JVMS 的方案）** - 在 PATH 中放置一个符号链接，切换时只需更新链接目标
-   - ✅ 所有终端立即生效，无需重启
-   - ✅ 实现简洁，稳定可靠
-   - ✅ 系统重启后仍然有效
+2. **Use symbolic links (the JVMS approach)** - Keep a symlink in PATH and update its target when switching
+   - ✅ Every terminal reflects the change immediately, no restart needed
+   - ✅ Simple and reliable implementation
+   - ✅ Persists across system reboots
 
-### JVMS 的实现
+### How JVMS works
 
-- **初始化时**：`jvms init` 创建符号链接并添加到系统 PATH
-- **切换时**：`jvms switch x.x.x` 只需更新符号链接的目标
-- **无需管理员**：切换操作需要管理员权限，但初始化后只需切换时运行一次
+- **During initialization**: `jvms init` creates symbolic links and adds them to PATH
+- **When switching**: `jvms switch x.x.x` updates the symlink target
+- **No administrator afterward**: switching requires admin privileges, but only needs to run once per switch
 
-这种方式既保证了便利性，又最大化了性能和稳定性。
+This approach keeps things convenient while maximizing performance and stability.
 
-## 多镜像源支持
+## Mirror Support
 
-JVMS 自动从以下镜像源获取 JDK 版本：
+JVMS automatically fetches JDK builds from the following mirrors:
 
-### Adoptium (Eclipse Temurin) (移除)
-- OpenJDK 的官方发行版
-- 长期支持（LTS）版本
-- 企业级质量保证
+### Adoptium (Eclipse Temurin) (removed)
+- Official OpenJDK distribution
+- Long-term support (LTS) releases
+- Enterprise-grade quality assurance
 
-### Azul Zulu (移除)
-- Azul Systems 提供的 OpenJDK 发行版
-- 支持多种平台和架构
-- 提供商业支持选项
+### Azul Zulu (removed)
+- OpenJDK builds provided by Azul Systems
+- Supports multiple platforms and architectures
+- Offers commercial support options
 
-### 华为云 OpenJDK 镜像（新增）
-- 国内镜像，下载速度快
-- 自动匹配系统架构（amd64/arm64）
-- 支持 JDK 9 到 JDK 25
+### Huawei Cloud OpenJDK Mirror (added)
+- Domestic mirror with fast download speeds
+- Automatically detects system architecture (amd64/arm64)
+- Supports JDK 9 through JDK 25
 
-JVMS 会自动筛选适合你当前系统（Windows/amd64）的版本，无需手动选择。
+JVMS automatically filters versions that match your current system (Windows/amd64), so there is no need to pick manually.
 
-## 常见问题
+## FAQ
 
-### Q: 是否需要预先安装 JDK？
-A: 不需要。JVMS 使用 Go 语言编写，完全独立运行。
+### Q: Do I need to pre-install a JDK?
+A: No. JVMS is written in Go and runs independently.
 
-### Q: 切换版本需要重启电脑吗？
-A: 不需要。使用符号链接技术，所有打开的终端会立即生效。
+### Q: Do I need to restart my computer after switching versions?
+A: No. With symbolic links, every open terminal reflects the change instantly.
 
-### Q: 可以同时使用多个 JDK 版本吗？
-A: 可以。安装多个版本后，使用 `jvms switch` 全局切换，或 `jvms use` 在当前会话临时切换。
+### Q: Can I use multiple JDK versions simultaneously?
+A: Yes. Install multiple versions, then use `jvms switch` to change globally or `jvms use` for the current session.
 
-### Q: 如何卸载 JVMS？
-A: 删除 JVMS 安装目录，并手动清理系统 PATH 中的 JAVA_HOME 相关配置即可。
+### Q: How do I uninstall JVMS?
+A: Delete the JVMS installation directory and manually clean any JAVA_HOME entries from your PATH.
 
-### Q: JVMS 支持哪些 Windows 版本？
-A: 支持 Windows 7 及以上版本（需要管理员权限创建符号链接）。
+### Q: Which Windows versions does JVMS support?
+A: Windows 7 or later (administrator privileges are required to create symbolic links).
 
-### Q: 为什么需要管理员权限？
-A: Windows 创建符号链接需要管理员权限。只在 `jvms init` 和 `jvms switch` 时需要。
+### Q: Why are administrator privileges needed?
+A: Windows requires administrator rights to create symbolic links. You only need them for `jvms init` and `jvms switch`.
 
-## 项目信息
+## Project Info
 
-### 技术栈
+### Tech stack
 
-- 编程语言：Go
-- 依赖管理：Go Modules
-- HTML解析：golang.org/x/net/html
+- Language: Go
+- Dependency management: Go Modules
+- HTML parsing: golang.org/x/net/html
 
-### 贡献指南
+### Contribution guide
 
-欢迎提交 Issue 和 Pull Request！
+Contributions via Issues and Pull Requests are welcome!
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### 更新日志
+### Changelog
 
-查看 [Releases](https://github.com/tea4go/jvms/releases) 了解版本更新历史。
+See [Releases](https://github.com/tea4go/jvms/releases) for the version history.
 
-### 致谢
+### Acknowledgements
 
-本项目灵感来源于 Node.js 社区的 NVM（Node Version Manager），并针对 Windows 和 JDK 进行了优化。
+This project is inspired by the Node.js community's NVM (Node Version Manager) and optimized for Windows and JDK workflows.
 
-## 许可证
+## License
 
 MIT License
 
 Copyright (c) 2024 JVMS Contributors
 
-详见 [LICENSE](LICENSE) 文件。
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 快速链接
+## Quick Links
 
-- [下载最新版本](https://github.com/tea4go/jvms/releases)
-- [报告问题](https://github.com/tea4go/jvms/issues)
-- [查看源码](https://github.com/tea4go/jvms)
-- [参与贡献](https://github.com/tea4go/jvms/pulls)
+- [Download the latest release](https://github.com/tea4go/jvms/releases)
+- [Report issues](https://github.com/tea4go/jvms/issues)
+- [Browse the source](https://github.com/tea4go/jvms)
+- [Contribute](https://github.com/tea4go/jvms/pulls)
 
-**如果 JVMS 对你有帮助，请给我们一个 ⭐️ Star！**
+**If JVMS helps you, please give us a ⭐️ Star!**
