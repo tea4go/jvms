@@ -90,8 +90,10 @@ func Download(url string, target string) bool {
 
 	// 显示完成时间
 	bar.ShowFinalTime = true
-
 	bar.SetWidth(80)
+
+	// 设置输出到 stderr，并确保使用无缓冲输出
+	bar.Output = os.Stderr
 
 	bar.Start()
 	writer := io.MultiWriter(output, bar)
