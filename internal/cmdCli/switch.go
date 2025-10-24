@@ -77,12 +77,6 @@ func switchFunc(ctx *cli.Context, cfx *entity.TConfig) error {
 		}
 	}
 
-	// 切换JDK不需要再重新设置环境变量
-	// err = setJavaHome(cfx.JavaHome)
-	// if err != nil {
-	// 	return err
-	// }
-
 	err = os.Symlink(filepath.Join(cfx.Store, v), cfx.JavaHome)
 	if err != nil {
 		return fmt.Errorf("switch jdk failed (%s), %s", cfx.JavaHome, err.Error())
