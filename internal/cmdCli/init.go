@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/tea4go/jvms/internal/entity"
+	"github.com/tea4go/jvms/utils/env"
 	"github.com/urfave/cli/v2"
 )
 
@@ -31,7 +32,7 @@ func initCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	}
 
 	// 初始化设置环境变量
-	return setJavaHome(cfx.JavaHome)
+	return env.SetJavaHome(cfx.JavaHome)
 }
 
 // jdk缺省目录：
