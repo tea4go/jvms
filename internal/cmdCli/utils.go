@@ -435,11 +435,11 @@ func setJavaHome(javaHome string) error {
 // setJavaHomeWindows Windows 下设置环境变量
 func setJavaHomeWindows(javaHome string) error {
 	// 设置 JAVA_HOME
-	logs.Debug("setx JAVA_HOME=%s /M", javaHome)
-	cmd := exec.Command("cmd", "/C", "setx", "JAVA_HOME", javaHome, "/M")
+	logs.Debug("setx JAVA_HOME=%s", javaHome)
+	cmd := exec.Command("setx", "JAVA_HOME", javaHome)
 	err := cmd.Run()
 	if err != nil {
-		return errors.New("setting environment variable JAVA_HOME failed, run as administrator")
+		return errors.New("设置用户环境变量 JAVA_HOME 失败")
 	}
 	logs.Debug("设置 JAVA_HOME 环境变量为 ", javaHome)
 
@@ -456,12 +456,12 @@ func setJavaHomeWindows(javaHome string) error {
 	if !containsPath(currentPath, currentExePath) {
 		newPath = currentExePath + ";" + newPath
 	}
-	cmd = exec.Command("cmd", "/C", "setx", "path", newPath, "/m")
+	cmd = exec.Command("setx", "PATH", newPath)
 	err = cmd.Run()
 	if err != nil {
-		return errors.New("setting environment variable JAVA_HOME failed, run as administrator")
+		return errors.New("设置用户环境变量 PATH 失败")
 	}
-	fmt.Println("Add jvms.exe to the 'path' environment variable")
+	fmt.Println("已将 jvms.exe 添加到用户 PATH 环境变量")
 	return nil
 }
 
