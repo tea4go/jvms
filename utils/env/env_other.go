@@ -23,8 +23,9 @@ func SetJavaHome(javaHome string) error {
 	}
 	logs.Debug("开始设置环境变量")
 
-	// 需要更新的配置文件列表
+	// 需要更新的配置文件列表（.profile 优先，因为它更通用）
 	configFiles := []string{
+		filepath.Join(homeDir, ".profile"),
 		filepath.Join(homeDir, ".zshrc"),
 		filepath.Join(homeDir, ".bashrc"),
 		filepath.Join(homeDir, ".bash_profile"),
@@ -42,10 +43,20 @@ func SetJavaHome(javaHome string) error {
 
 	// 遍历所有配置文件
 	for _, configFile := range configFiles {
-		// 只处理已存在的文件
-		if !file.Exists(configFile) {
+		// .profile 文件如果不存在则创建，其他文件只处理已存在的
+		if configFile == filepath.Join(homeDir, ".profile") {
+			if !file.Exists(configFile) {
+				logs.Debug("创建 .profile 文件")
+				// 创建空文件
+				if err := os.WriteFile(configFile, []byte(""), 0644); err != nil {
+					logs.Warning("⚠️ 警告: 创建 %s 失败，%v", configFile, err)
+					continue
+				}
+			}
+		} else if !file.Exists(configFile) {
 			continue
 		}
+
 		logs.Debug("加载文件 %s ......", configFile)
 
 		// 读取现有配置
@@ -76,7 +87,7 @@ func SetJavaHome(javaHome string) error {
 		} else {
 			logs.Debug("尾部追加新配置")
 			// 确保文件末尾有换行符
-			if !strings.HasSuffix(content, "\n") {
+			if !strings.HasSuffix(content, "\n") && len(content) > 0 {
 				content += "\n"
 			}
 			newContent = content + "\n" + newConfig + "\n"
@@ -98,7 +109,7 @@ func SetJavaHome(javaHome string) error {
 
 	// 输出更新结果
 	if len(updatedFiles) == 0 {
-		return fmt.Errorf("未找到任何配置文件 (.zshrc, .bashrc, .bash_profile)")
+		return fmt.Errorf("未找到任何配置文件")
 	}
 
 	logs.Debug("✓ 已更新以下配置文件:")
