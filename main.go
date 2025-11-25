@@ -3,7 +3,9 @@
 package main
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	logs "github.com/tea4go/gh/log4go"
 
@@ -17,6 +19,7 @@ var IsBeta string = "false"
 
 // main 是程序的入口函数
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	logs.StartLogger()
 	logs.SetLevel(1)
 	app := cmdCli.NewApp(AppName, AppVersion, BuildTime)

@@ -242,7 +242,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	cacheFile := getCacheFilePath()
 
 	// 检查缓存是否有效
-	if isCacheValid(cacheFile) {
+	if cfx.WebAll && isCacheValid(cacheFile) {
 		// 尝试从缓存加载
 		versions, err := loadCachedVersions(cacheFile)
 		if err == nil && len(versions) > 0 {

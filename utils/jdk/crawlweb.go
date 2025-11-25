@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/rand"
 	"net/http"
 	"os"
 	"regexp"
@@ -53,6 +54,75 @@ type TWebFileInfo struct {
 	Name         string // 文件名
 	LastModified string // 最后修改时间
 	Size         string // 文件大小
+}
+
+// generateUserAgent 生成随机User-Agent
+func generateUserAgent() string {
+	browsers := []string{
+		"Mozilla/5.0 (Windows NT 11.0; Win64; x64)",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 26_15_7)",
+		"Mozilla/5.0 (X11; Linux x86_64)",
+		"Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+		"Mozilla/5.0 (Android 24; Mobile; rv:68.0)",
+	}
+
+	engines := []string{
+		"AppleWebKit/537.36 (KHTML, like Gecko)",
+		"AppleWebKit/605.1.15 (KHTML, like Gecko)",
+	}
+
+	chromeVersions := []string{
+		"Chrome/98.0.4758.102",
+		"Chrome/99.0.4844.51",
+		"Chrome/100.0.4896.60",
+		"Chrome/101.0.4951.41",
+		"Chrome/102.0.5005.61",
+	}
+
+	safariVersions := []string{
+		"Safari/537.36",
+		"Safari/605.1.15",
+		"Safari/137.36",
+		"Safari/905.1.15",
+	}
+
+	firefoxVersions := []string{
+		"Gecko/20100101 Firefox/103.0",
+		"Gecko/20100101 Firefox/102.0",
+		"Gecko/20100101 Firefox/101.0",
+		"Gecko/20100101 Firefox/98.0",
+		"Gecko/20100101 Firefox/99.0",
+		"Gecko/20100101 Firefox/100.0",
+	}
+
+	mobileSuffixes := []string{
+		" Mobile/12E168",
+		" Mobile/13E178",
+		" Mobile/14E158",
+		" Mobile/15E148",
+		" Mobile/16E145",
+		" Mobile/17E142",
+		" Mobile/18E138",
+	}
+
+	// 随机选择浏览器类型
+	browser := browsers[rand.Intn(len(browsers))]
+	engine := engines[rand.Intn(len(engines))]
+
+	// 根据浏览器类型选择不同的版本
+	var version string
+	switch rand.Intn(3) {
+	case 0:
+		version = chromeVersions[rand.Intn(len(chromeVersions))]
+	case 1:
+		version = safariVersions[rand.Intn(len(safariVersions))]
+	case 2:
+		version = firefoxVersions[rand.Intn(len(firefoxVersions))]
+	}
+
+	mobileSuffix := mobileSuffixes[rand.Intn(len(mobileSuffixes))]
+
+	return fmt.Sprintf("%s %s %s%s%d", browser, engine, version, mobileSuffix, rand.Intn(1000))
 }
 
 // mapOSToGOOS 将操作系统目录名映射为 GOOS 标准名称
@@ -168,7 +238,9 @@ func fetchHTML(url string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("创建请求失败，%v", err)
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+	//req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+	UserAgent := generateUserAgent()
+	req.Header.Set("User-Agent", UserAgent)
 
 	// 忽略证书验证
 	customTransport := &http.Transport{
@@ -182,6 +254,10 @@ func fetchHTML(url string) (string, error) {
 		return "", fmt.Errorf("获取网页失败，%v", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		logs.Warning("%s <== %s", resp.Status, UserAgent)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
