@@ -73,3 +73,4 @@ del jdkdlindex.json   >nul 2>nul
 
 echo =============================================================
 echo %app_name% -l=6 rls -t lzu -a
+jvms -l=7 rls -t tuna -a

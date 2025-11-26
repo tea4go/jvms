@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -23,5 +24,8 @@ func main() {
 	logs.StartLogger()
 	logs.SetLevel(1)
 	app := cmdCli.NewApp(AppName, AppVersion, BuildTime)
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

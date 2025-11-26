@@ -242,7 +242,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	cacheFile := getCacheFilePath()
 
 	// 检查缓存是否有效
-	if cfx.WebAll && isCacheValid(cacheFile) {
+	if !cfx.WebAll && isCacheValid(cacheFile) {
 		// 尝试从缓存加载
 		versions, err := loadCachedVersions(cacheFile)
 		if err == nil && len(versions) > 0 {
@@ -260,6 +260,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	var err error
 
 	// 根据 webtype 参数选择不同的镜像源
+	//logs.Debug("开始找 %s JDK版本", cfx.WebType)
 	switch strings.ToLower(cfx.WebType) {
 	case "tuna":
 		logs.Info("📦 使用镜像源: 清华大学 (Tsinghua University)")
@@ -291,7 +292,6 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		WebJDK.BaseURL = "https://api.adoptium.net/v3"
 		logs.Info("🔗 镜像地址: %s", WebJDK.BaseURL)
 		downOpenJDKs, err = WebJDK.ParseURL()
-	case "huawei":
 	default:
 		// 默认使用huawei镜像源
 		logs.Info("📦 使用镜像源: 华为云 (Huawei Cloud)")
@@ -305,6 +305,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		logs.Error("❌ 错误: 获取JDK版本镜像源失败，请检查网络连接或镜像源地址是否正确\n%v", err)
 		return nil, err
 	}
+	//logs.Debug("找到 %d 个JDK版本", len(downOpenJDKs))
 
 	// 获取当前系统和架构信息
 	currentOS := runtime.GOOS     // linux, darwin, windows
@@ -312,6 +313,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 
 	// 过滤符合当前系统和架构的JDK
 	filteredJDKs := filterJDKsByPlatform(downOpenJDKs, currentOS, currentArch)
+	//logs.Debug("找到 %d 个符合当前系统和架构的JDK版本", len(filteredJDKs))
 
 	if len(filteredJDKs) == 0 {
 		return nil, fmt.Errorf("❌ 错误: 未找到适合当前系统(%s-%s)的JDK版本", currentOS, currentArch)
@@ -356,6 +358,7 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	}
 
 	// 对版本进行排序（从大到小）
+	logs.Debug("对版本进行排序（从大到小）")
 	sort.Slice(versions, func(i, j int) bool {
 		return compareVersions(versions[i].Version, versions[j].Version) > 0
 	})
@@ -376,11 +379,11 @@ func filterJDKsByPlatform(jdks []jdk.TOpenJDK, osType, arch string) []jdk.TOpenJ
 	var filtered []jdk.TOpenJDK
 
 	// 构建平台标识符
-	platformSuffix := getPlatformSuffix(osType, arch)
-
+	osType = strings.ToLower(osType)
+	arch = strings.ToLower(arch)
 	for _, oneJdk := range jdks {
 		// 检查URL是否包含对应的平台标识
-		if strings.Contains(oneJdk.URL, platformSuffix) {
+		if checkOSType(oneJdk, osType) && checkArchType(oneJdk, arch) {
 			filtered = append(filtered, oneJdk)
 		}
 	}
@@ -388,32 +391,36 @@ func filterJDKsByPlatform(jdks []jdk.TOpenJDK, osType, arch string) []jdk.TOpenJ
 	return filtered
 }
 
-// 获取平台后缀标识
-func getPlatformSuffix(osType, arch string) string {
-	var osSuffix, archSuffix string
-
-	// 转换操作系统名称
-	switch osType {
-	case "linux":
-		osSuffix = "linux"
-	case "darwin":
-		osSuffix = "macos"
-	case "windows":
-		osSuffix = "windows"
-	default:
-		osSuffix = osType
+func checkArchType(oneJdk jdk.TOpenJDK, arch string) bool {
+	url := strings.ToLower(oneJdk.URL)
+	if strings.Contains(url, arch) {
+		return true
 	}
 
-	// 转换架构名称
 	switch arch {
 	case "amd64":
-		archSuffix = "x64"
+		return strings.Contains(url, "amd") || strings.Contains(url, "x64") || strings.Contains(url, "x86")
 	case "arm64":
-		archSuffix = "aarch64"
-	default:
-		archSuffix = arch
+		return strings.Contains(url, "arm") || strings.Contains(url, "aarch64")
+	}
+	return oneJdk.GOARCH == arch
+}
+
+// 获取平台后缀标识
+func checkOSType(oneJdk jdk.TOpenJDK, osType string) bool {
+	url := strings.ToLower(oneJdk.URL)
+	if strings.Contains(url, osType) {
+		return true
 	}
 
-	// 返回格式: linux-x64, macos-aarch64, windows-x64 等
-	return fmt.Sprintf("%s-%s", osSuffix, archSuffix)
+	switch osType {
+	case "linux":
+		return strings.Contains(url, "win")
+	case "darwin":
+		return strings.Contains(url, "macos") || strings.Contains(url, "mac") || strings.Contains(url, "osx")
+	case "windows":
+		return strings.Contains(url, "win")
+	}
+
+	return oneJdk.GOOS == osType
 }
