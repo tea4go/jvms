@@ -374,6 +374,35 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 	return versions, nil
 }
 
+// 从当前本地json缓存文件获取源类型
+func getCurrentWebType(cfx *entity.TConfig) string {
+	webType := cfx.WebType
+	// 获取缓存文件路径
+	cacheFile := getCacheFilePath()
+	if isCacheValid(cacheFile) {
+		// 尝试从缓存加载
+		versions, err := loadCachedVersions(cacheFile)
+		if err == nil && len(versions) > 0 {
+			// 本地缓存文件存在，且有数据
+			firstVersion := versions[0]
+			if strings.Contains(firstVersion.Url, "huawei") {
+				webType = "huawei"
+			} else if strings.Contains(firstVersion.Url, "injdk") {
+				webType = "injdk"
+			} else if strings.Contains(firstVersion.Url, "azul") {
+				webType = "azul"
+			} else if strings.Contains(firstVersion.Url, "adoptium") {
+				webType = "adoptium"
+			} else if strings.Contains(firstVersion.Url, "tuna") {
+				webType = "tuna"
+			} else if strings.Contains(firstVersion.Url, "lzu") {
+				webType = "lzu"
+			}
+		}
+	}
+	return webType
+}
+
 // 根据系统和架构过滤JDK列表
 func filterJDKsByPlatform(jdks []jdk.TOpenJDK, osType, arch string) []jdk.TOpenJDK {
 	var filtered []jdk.TOpenJDK

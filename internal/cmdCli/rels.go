@@ -23,6 +23,14 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 		web.SetProxy(cfx.Proxy)
 	}
 
+	showCurrentWebType := ctx.Bool("s")
+	if showCurrentWebType {
+		// 查看当前下载源
+		webType := getCurrentWebType(cfx)
+		cfx.WebType = webType
+		fmt.Printf("%s\n", webType)
+		return nil
+	}
 	showAll := ctx.Bool("a")
 	webType := ctx.String("webtype")
 
