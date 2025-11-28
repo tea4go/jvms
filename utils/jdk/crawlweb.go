@@ -58,7 +58,7 @@ type TWebFileInfo struct {
 }
 
 // generateUserAgent 生成随机User-Agent
-func generateUserAgent() string {
+func GenerateUserAgent() string {
 	browsers := []string{
 		"Mozilla/5.0 (Windows NT 11.0; Win64; x64)",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 26_15_7)",
@@ -239,8 +239,7 @@ func fetchHTML(url string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("创建请求失败，%v", err)
 	}
-	//req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-	UserAgent := generateUserAgent()
+	UserAgent := GenerateUserAgent()
 	req.Header.Set("User-Agent", UserAgent)
 
 	// 忽略证书验证
@@ -1442,7 +1441,9 @@ func (s *TWebAzul) FetchJDKList(apiURL string, goos string, goarch string) ([]TO
 	if err != nil {
 		return nil, fmt.Errorf("创建请求失败，%v", err)
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+
+	UserAgent := GenerateUserAgent()
+	req.Header.Set("User-Agent", UserAgent)
 
 	// 忽略证书验证
 	customTransport := &http.Transport{
@@ -1627,7 +1628,8 @@ func (s *TWebAdoptium) GetAvailableReleases() ([]int, error) {
 	if err != nil {
 		return nil, fmt.Errorf("创建请求失败，%v", err)
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0")
+	UserAgent := GenerateUserAgent()
+	req.Header.Set("User-Agent", UserAgent)
 
 	// 创建自定义 HTTP 客户端，跳过证书验证
 	customTransport := &http.Transport{
@@ -1676,7 +1678,8 @@ func (s *TWebAdoptium) FetchJDKForPlatform(version int, os, arch, goos, goarch s
 	if err != nil {
 		return nil, fmt.Errorf("创建请求失败，%v", err)
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0")
+	UserAgent := GenerateUserAgent()
+	req.Header.Set("User-Agent", UserAgent)
 
 	// 忽略证书验证
 	customTransport := &http.Transport{

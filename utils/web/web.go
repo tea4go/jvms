@@ -12,6 +12,7 @@ import (
 	"time"
 
 	logs "github.com/tea4go/gh/log4go"
+	jdk "github.com/tea4go/jvms/utils/jdk"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
@@ -60,7 +61,8 @@ func Download(url string, target string) bool {
 	// HTTP 418 "I'm a teapot" 错误是华为云镜像的反爬虫机制：
 	// - 服务器检测到请求缺少 User-Agent 头或使用默认的 User-Agent（如 Go 的 Go-http-client/1.1）
 	// - 为了防止爬虫和自动化工具滥用，返回 418 状态码拒绝请求
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+	UserAgent := jdk.GenerateUserAgent()
+	req.Header.Set("User-Agent", UserAgent)
 
 	response, err := client.Do(req)
 	if err != nil {
