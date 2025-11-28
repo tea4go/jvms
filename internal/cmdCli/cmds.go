@@ -257,6 +257,11 @@ func newRlsCommand(cfx *entity.TConfig) *cli.Command {
 				Usage:   "Setup the OpenJDK download source",
 				Value:   "lzu",
 			},
+			&cli.BoolFlag{
+				Name:    "show-webtype",
+				Aliases: []string{"s"},
+				Usage:   "Show current download source",
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			return rlsCmd(ctx, cfx)

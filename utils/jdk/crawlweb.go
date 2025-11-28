@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -1346,6 +1347,15 @@ func (s *TWebHuawei) ParseWebFileName(filename string) (string, string, string, 
 		}
 	default:
 		return "", "", "", fmt.Errorf("未知系统架构(%s)", goarch)
+	}
+
+	// 检查是否匹配当前运行环境
+	currentGoos := runtime.GOOS
+	currentGoarch := runtime.GOARCH
+
+	if goos != currentGoos || goarch != currentGoarch {
+		return "", "", "", fmt.Errorf("不匹配当前环境(需要:%s-%s, 文件:%s-%s)",
+			currentGoos, currentGoarch, goos, goarch)
 	}
 
 	return goos, goarch, version, nil
