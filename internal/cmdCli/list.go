@@ -23,7 +23,7 @@ func listCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	v := jdk.GetInstalled(cfx.Store)
 	for i, version := range v {
 		if cfx.CurrentJDKVersion == version {
-			fmt.Printf("* %d - %snvm \n", i+1, version)
+			fmt.Printf("* %d - %s\n", i+1, version)
 		} else {
 			fmt.Printf("  %d - %s\n", i+1, version)
 		}
