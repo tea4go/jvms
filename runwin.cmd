@@ -3,7 +3,7 @@ chcp 65001
 cls
 
 set app_name=jvms
-set app_ver=3.0.5
+set app_ver=3.0.6
 
 rem 获取当前时间
 set "hour=%time:~0,2%"
