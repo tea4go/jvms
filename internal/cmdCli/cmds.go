@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
+	"runtime"
+	"time"
 
-	"github.com/tucnak/store"
 	"github.com/urfave/cli/v2"
 
 	logs "github.com/tea4go/gh/log4go"
@@ -30,19 +32,9 @@ var cfx entity.TConfig
 //	error - 初始化失败时返回错误
 func startup(c *cli.Context) error {
 	logs.Debug("加载配置 jvms.json 文件")
-	// 注册 JSON 格式的配置存储器
-	store.Register(
-		"json",
-		func(v any) ([]byte, error) {
-			return json.MarshalIndent(v, "", "    ")
-		},
-		json.Unmarshal)
-
-	// 初始化配置存储
-	store.Init("jvms")
 
 	// 加载配置文件
-	if err := store.Load("jvms.json", &cfx); err != nil {
+	if err := loadConfigFromPath(configFilePath(), &cfx); err != nil {
 		return errors.New("加载配置 jvms.json 失败，" + err.Error())
 	}
 
@@ -72,10 +64,78 @@ func startup(c *cli.Context) error {
 // shutdown 在应用关闭后执行
 // 主要功能：保存配置到 jvms.json 文件
 func shutdown(c *cli.Context) error {
-	if err := store.Save("jvms.json", &cfx); err != nil {
+	if err := saveConfigToPath(configFilePath(), &cfx); err != nil {
 		return fmt.Errorf("警告: 保存配置失败，%s", err.Error())
 	}
 	return nil
+}
+
+func configFilePath() string {
+	if runtime.GOOS == "windows" {
+		return filepath.Join(os.Getenv("APPDATA"), "jvms", "jvms.json")
+	}
+
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		configDir = filepath.Join(os.Getenv("HOME"), ".config")
+	}
+	return filepath.Join(configDir, "jvms", "jvms.json")
+}
+
+func loadConfigFromPath(path string, cfg *entity.TConfig) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	if len(data) == 0 {
+		return nil
+	}
+
+	if err := json.Unmarshal(data, cfg); err != nil {
+		backupPath := fmt.Sprintf("%s.bad.%s", path, time.Now().Format("20060102150405"))
+		if renameErr := os.Rename(path, backupPath); renameErr != nil {
+			return fmt.Errorf("配置文件损坏且备份失败: %v; 原始错误: %w", renameErr, err)
+		}
+		fmt.Printf("配置文件 jvms.json 损坏，已备份为 %s，并使用默认配置继续。\n", backupPath)
+		*cfg = entity.TConfig{}
+		return nil
+	}
+	return nil
+}
+
+func saveConfigToPath(path string, cfg *entity.TConfig) error {
+	data, err := json.MarshalIndent(cfg, "", "    ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+
+	tmpFile, err := os.CreateTemp(filepath.Dir(path), ".jvms.json.*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmpFile.Name()
+	defer os.Remove(tmpPath)
+
+	if _, err := tmpFile.Write(data); err != nil {
+		tmpFile.Close()
+		return err
+	}
+	if err := tmpFile.Close(); err != nil {
+		return err
+	}
+
+	if runtime.GOOS == "windows" {
+		_ = os.Remove(path)
+	}
+	return os.Rename(tmpPath, path)
 }
 
 // NewApp 创建 CLI 应用实例
