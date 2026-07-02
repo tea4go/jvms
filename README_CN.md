@@ -98,10 +98,10 @@ COMMANDS:
 #### 1. 查看可下载的 JDK 版本
 
 ```cmd
-# 查看前 10 个可用版本
+# 查看可安装版本
 jvms rls
 
-# 查看所有可用版本
+# 查看当前下载源提供的全部构建
 jvms rls -a
 ```
 
@@ -118,8 +118,8 @@ jvms rls -a
   8) openjdk-18.0.2.1
   9) openjdk-17.0.2
  10) openjdk-16.0.2
-
-使用 "jvm rls -a" 显示所有版本
+ 11) openjdk-11.0.2
+ 12) openjdk-1.8.0_392
 ```
 
 #### 2. 安装 JDK

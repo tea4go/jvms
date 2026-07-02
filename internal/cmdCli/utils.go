@@ -363,15 +363,21 @@ func getJdkVersions(cfx *entity.TConfig) ([]entity.TJDKVersion, error) {
 		return compareVersions(versions[i].Version, versions[j].Version) > 0
 	})
 
-	// 保存到缓存
-	if err := saveCachedVersions(cacheFile, versions); err != nil {
-		logs.Warning("警告: 保存缓存失败，%v", err.Error())
-		// 不返回错误，因为主要功能已经完成
-	} else {
-		logs.Debug("版本列表已缓存到本地 -", cacheFile)
+	if shouldSaveJdkVersionsCache(cfx) {
+		// 保存到缓存
+		if err := saveCachedVersions(cacheFile, versions); err != nil {
+			logs.Warning("警告: 保存缓存失败，%v", err.Error())
+			// 不返回错误，因为主要功能已经完成
+		} else {
+			logs.Debug("版本列表已缓存到本地 -", cacheFile)
+		}
 	}
 
 	return versions, nil
+}
+
+func shouldSaveJdkVersionsCache(cfx *entity.TConfig) bool {
+	return !cfx.WebAll || cfx.RefreshCache
 }
 
 // 从当前本地json缓存文件获取源类型

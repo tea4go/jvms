@@ -98,10 +98,10 @@ GLOBAL OPTIONS:
 #### 1. Browse downloadable JDK versions
 
 ```cmd
-# Show the first 10 available versions
+# Show available versions
 jvms rls
 
-# Show all available versions
+# Show all builds provided by the selected download source
 jvms rls -a
 ```
 
@@ -118,8 +118,8 @@ Loading version list from local cache...
   8) openjdk-18.0.2.1
   9) openjdk-17.0.2
  10) openjdk-16.0.2
-
-Use "jvm rls -a" to display all versions
+ 11) openjdk-11.0.2
+ 12) openjdk-1.8.0_392
 ```
 
 #### 2. Install a JDK

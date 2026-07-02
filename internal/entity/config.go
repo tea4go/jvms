@@ -10,6 +10,8 @@ type TConfig struct {
 	WebType string `json:"web_type"`
 	// 是否全部JDK，如果为否，则一个大版本只保留一个
 	WebAll bool `json:"web_all"`
+	// 是否强制刷新JDK版本缓存
+	RefreshCache bool `json:"-"`
 	// Proxy 代理服务器地址
 	Proxy string `json:"proxy"`
 	// Store JDK存储路径

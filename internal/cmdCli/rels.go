@@ -36,6 +36,7 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	cfx.WebAll = showAll
 	cfx.WebType = webType
+	cfx.RefreshCache = shouldRefreshJdkVersionsCache(ctx)
 
 	versions, err := getJdkVersions(cfx)
 	if err != nil {
@@ -44,10 +45,6 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 
 	for i, version := range versions {
 		fmt.Printf("%3d) %s\n", i+1, version.Version)
-		if !showAll && i >= 9 {
-			fmt.Println("Use 'jvm rls -a' to show all versions")
-			break
-		}
 	}
 
 	if len(versions) == 0 {
@@ -55,4 +52,8 @@ func rlsCmd(ctx *cli.Context, cfx *entity.TConfig) error {
 	}
 
 	return nil
+}
+
+func shouldRefreshJdkVersionsCache(ctx *cli.Context) bool {
+	return ctx.IsSet("webtype") || ctx.IsSet("t")
 }
